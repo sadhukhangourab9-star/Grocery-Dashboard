@@ -343,19 +343,27 @@
               <select class="select" id="o-month"></select>
             </div>
             <div class="form-group">
-              <label>Platform / Account</label>
+              <label>Platform</label>
               <select class="select" id="o-account">
-                <option>Amazon</option>
-                <option>Flipkart</option>
-                <option>Blinkit</option>
-                <option>Souvik da 5 pc basket</option>
-                <option>Rajkumar Da</option>
-                <option>Other</option>
+                <option value="Amazon">Amazon</option>
+                <option value="Flipkart">Flipkart</option>
+                <option value="Blinkit">Blinkit</option>
               </select>
             </div>
             <div class="form-group">
               <label>Date</label>
               <input type="date" class="input" id="o-date">
+            </div>
+          </div>
+
+          <div class="form-row col2">
+            <div class="form-group">
+              <label>Account Name <span style="color:var(--text-dim);font-weight:400">(whose account)</span></label>
+              <input type="text" class="input" id="o-account-name" placeholder="e.g. Gourab, Souvik da, Rajkumar da">
+            </div>
+            <div class="form-group">
+              <label>Order Name <span style="color:var(--text-dim);font-weight:400">(optional label)</span></label>
+              <input type="text" class="input" id="o-order-name" placeholder="e.g. Monthly stock, Top-up order">
             </div>
           </div>
 
@@ -665,13 +673,25 @@ function pickSlot(btn, slot) {
 }
 
 function buildLabel() {
-  const acc  = document.getElementById('o-account').value;
-  const date = document.getElementById('o-date').value;
-  const slot = document.getElementById('o-slot').value;
-  if (!date) return acc;
-  const d = new Date(date + 'T00:00:00');
-  const fmt = `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(-2)}`;
-  return slot ? `${acc} (${fmt}) ${slot}` : `${acc} (${fmt})`;
+  const platform    = document.getElementById('o-account').value;
+  const accountName = document.getElementById('o-account-name').value.trim();
+  const orderName   = document.getElementById('o-order-name').value.trim();
+  const date        = document.getElementById('o-date').value;
+  const slot        = document.getElementById('o-slot').value;
+
+  // Base: "Amazon - Gourab" or just "Amazon"
+  let base = accountName ? `${platform} - ${accountName}` : platform;
+  // Append order name if given
+  if (orderName) base += ` [${orderName}]`;
+  // Append date
+  if (date) {
+    const d = new Date(date + 'T00:00:00');
+    const fmt = `${d.getDate()}/${d.getMonth()+1}/${String(d.getFullYear()).slice(-2)}`;
+    base += ` (${fmt})`;
+  }
+  // Append slot
+  if (slot) base += ` ${slot}`;
+  return base;
 }
 
 async function submitOrder() {
@@ -707,6 +727,8 @@ function resetOrderForm() {
   document.querySelectorAll('.slot-pill').forEach(b => b.classList.remove('active'));
   document.getElementById('o-slot').value = '';
   document.getElementById('o-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('o-account-name').value = '';
+  document.getElementById('o-order-name').value = '';
 }
 
 // ══════════════════════════════════════════════
