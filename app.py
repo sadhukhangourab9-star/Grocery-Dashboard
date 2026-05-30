@@ -22,10 +22,12 @@ def get_sheet():
         raise RuntimeError("GOOGLE_CREDENTIALS_JSON env var not set")
     if not SHEET_ID:
         raise RuntimeError("GOOGLE_SHEET_ID env var not set")
-    data  = json.loads(CREDS_JSON)
+    # Strip surrounding quotes if pasted with them
+    creds_str = CREDS_JSON.strip().strip("'").strip('"') if CREDS_JSON.startswith("'") or CREDS_JSON.startswith('"') else CREDS_JSON
+    data  = json.loads(creds_str)
     creds = Credentials.from_service_account_info(data, scopes=SCOPES)
     gc    = gspread.authorize(creds)
-    return gc.open_by_key(SHEET_ID)
+    return gc.open_by_key(SHEET_ID.strip())
 
 def ws_or_create(sh, title, rows=500, cols=60):
     try:
@@ -121,10 +123,14 @@ def get_slots():
 def list_months():
     try:
         sh = get_sheet()
-        keys = [strip_inv(ws.title) for ws in sh.worksheets() if strip_inv(ws.title)]
-        return jsonify({"months": keys})
+        all_sheets = sh.worksheets()
+        keys = [strip_inv(ws.title) for ws in all_sheets if strip_inv(ws.title)]
+        return jsonify({
+            "months": keys,
+            "all_sheet_titles": [ws.title for ws in all_sheets]
+        })
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e), "hint": "Check GOOGLE_SHEET_ID and GOOGLE_CREDENTIALS_JSON env vars"}), 500
 
 @app.route("/api/months", methods=["POST"])
 def create_month():
