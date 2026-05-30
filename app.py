@@ -76,11 +76,33 @@ def get_slots_list(sh):
 @app.route("/api/health")
 def health():
     try:
-        sh = get_sheet()
+        creds_set  = bool(CREDS_JSON)
+        sheet_set  = bool(SHEET_ID)
+        creds_len  = len(CREDS_JSON) if CREDS_JSON else 0
+        if not creds_set:
+            return jsonify({"ok": False, "error": "GOOGLE_CREDENTIALS_JSON not set"}), 500
+        if not sheet_set:
+            return jsonify({"ok": False, "error": "GOOGLE_SHEET_ID not set"}), 500
+
+        sh     = get_sheet()
         titles = [ws.title for ws in sh.worksheets()]
-        return jsonify({"ok": True, "sheets": titles})
+        inv    = [t for t in titles if t.startswith("Inventory_")]
+        return jsonify({
+            "ok":           True,
+            "sheet_name":   sh.title,
+            "all_sheets":   titles,
+            "inv_sheets":   inv,
+            "creds_length": creds_len,
+            "sheet_id":     SHEET_ID[:8] + "..."
+        })
     except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
+        return jsonify({
+            "ok":           False,
+            "error":        str(e),
+            "creds_set":    bool(CREDS_JSON),
+            "sheet_set":    bool(SHEET_ID),
+            "creds_length": len(CREDS_JSON) if CREDS_JSON else 0
+        }), 500
 
 # ── /api/products ─────────────────────────────────────────────────────────────
 
@@ -202,19 +224,35 @@ def sync_db():
         products  = get_products_list(sh)
         headers   = FIXED_COLS + products
 
+        if not headers or len(headers) <= len(FIXED_COLS):
+            # No products yet — still create sheet with just fixed cols
+            headers = FIXED_COLS
+
+        # Re-fetch existing after possibly creating new sheets above
+        existing = {ws.title for ws in sh.worksheets()}
+
         if title not in existing:
-            ws = sh.add_worksheet(title=title, rows=500, cols=len(headers) + 5)
+            cols = max(len(headers) + 5, 20)
+            ws = sh.add_worksheet(title=title, rows=500, cols=cols)
             ws.update("A1", [headers])
-            ws.update("A2", [["-", "-", "Old Stock", "-", "Delivered"] + ["0"] * len(products)])
-            ws.format("A1:ZZ1", {
-                "textFormat": {"bold": True},
-                "backgroundColor": {"red": 0.13, "green": 0.37, "blue": 0.18}
-            })
+            old_row = ["-", "-", "Old Stock", "-", "Delivered"] + ["0"] * max(0, len(headers) - len(FIXED_COLS))
+            ws.update("A2", [old_row])
+            try:
+                ws.format("A1:Z1", {
+                    "textFormat": {"bold": True},
+                    "backgroundColor": {"red": 0.13, "green": 0.37, "blue": 0.18}
+                })
+            except:
+                pass
         else:
             ws = sh.worksheet(title)
-            ws.update("A1", [headers])
+            if headers:
+                ws.update("A1", [headers])
 
-        return jsonify({"success": True, "month": month_key})
+        # Return all inv sheets so frontend can show them
+        all_titles = [ws2.title for ws2 in sh.worksheets()]
+        inv_months = [strip_inv(t) for t in all_titles if strip_inv(t)]
+        return jsonify({"success": True, "month": month_key, "all_months": inv_months})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
