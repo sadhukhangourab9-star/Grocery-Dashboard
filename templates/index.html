@@ -130,45 +130,20 @@
     .sc-badge.ok{background:rgba(63,185,80,.15);color:var(--green)}
 
     /* RECEIVER VIEW */
-    .slot-section{margin-bottom:28px}
-    .slot-header{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:12px;cursor:pointer;user-select:none}
-    .slot-header:hover{border-color:var(--green)}
-    .slot-tag{font-family:var(--mono);font-size:12px;background:var(--blue-bg);color:var(--blue);border:1px solid rgba(88,166,255,.25);padding:3px 10px;border-radius:20px;font-weight:700}
-    .slot-title{font-size:14px;font-weight:600;flex:1}
-    .slot-count{font-size:12px;color:var(--text-muted);font-family:var(--mono)}
-    .slot-chevron{color:var(--text-dim);transition:transform .2s;font-size:12px}
-    .slot-body{display:block}
-    .slot-body.collapsed{display:none}
-
-    /* Slot summary table */
-    .summary-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
-    .summary-tbl th{background:rgba(88,166,255,.07);color:var(--blue);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;padding:7px 10px;text-align:right;border-bottom:1px solid var(--border)}
-    .summary-tbl th:first-child{text-align:left}
-    .summary-tbl td{padding:6px 10px;border-bottom:1px solid rgba(42,53,72,.4);font-family:var(--mono);text-align:right}
-    .summary-tbl td:first-child{text-align:left;font-family:var(--body);font-weight:500}
-    .summary-tbl tr:last-child td{border-bottom:none}
-    .summary-tbl .td-qty{color:var(--green);font-weight:700}
-
-    /* Order cards */
-    .order-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:10px;overflow:hidden}
-    .order-card-hd{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer}
-    .order-card-hd:hover{background:rgba(255,255,255,.02)}
-    .order-platform{font-family:var(--mono);font-size:11px;background:rgba(63,185,80,.1);color:var(--green);padding:2px 8px;border-radius:20px;border:1px solid rgba(63,185,80,.2);flex-shrink:0}
-    .order-name{font-size:13px;font-weight:600;flex:1}
-    .order-acct{font-size:12px;color:var(--text-muted)}
-    .order-chevron{color:var(--text-dim);transition:transform .2s;font-size:12px;flex-shrink:0}
-    .order-card.open .order-chevron{transform:rotate(90deg)}
-    .order-body{display:none;padding:0 16px 14px;border-top:1px solid rgba(42,53,72,.5)}
-    .order-card.open .order-body{display:block}
-    .order-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;margin:12px 0}
-    .order-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:7px 10px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
-    .order-item .oi-name{color:var(--text-muted)}
-    .order-item .oi-qty{font-family:var(--mono);font-weight:700;color:var(--green-bright)}
-    .order-actions{display:flex;gap:8px;margin-top:10px;align-items:center}
-    .order-date-badge{font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--surface);padding:3px 8px;border-radius:4px;border:1px solid var(--border)}
-
-    /* Delivered badge */
-    .v-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(63,185,80,.12);color:var(--green);border-radius:4px;padding:3px 9px;font-size:12px;font-family:var(--body);border:1px solid rgba(63,185,80,.2)}
+    .rv-row{border:1px solid var(--border);border-radius:var(--rs);margin-bottom:8px;overflow:hidden;background:var(--surface)}
+    .rv-row-hd{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;transition:background .12s;user-select:none}
+    .rv-row-hd:hover{background:var(--surface2)}
+    .rv-chevron{color:var(--text-muted);font-size:11px;width:14px;flex-shrink:0}
+    .rv-row-label{flex:1;font-size:13.5px;font-weight:500}
+    .rv-row-badge{font-size:11px;color:var(--text-muted);font-family:var(--mono);background:var(--surface2);padding:2px 9px;border-radius:10px;border:1px solid var(--border);flex-shrink:0}
+    .rv-row-body{display:none;padding:14px 16px 16px;border-top:1px solid var(--border);background:var(--surface2)}
+    .rv-meta-bar{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--text-muted);margin-bottom:12px}
+    .rv-meta-bar b{color:var(--text)}
+    .rv-items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:7px;margin-bottom:14px}
+    .rv-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:8px 12px}
+    .rv-item-name{font-size:12.5px;color:var(--text-muted)}
+    .rv-item-qty{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--green-bright)}
+    .rv-actions{display:flex;gap:8px;align-items:center}
 
     /* TABLE */
     .tbl-wrap{overflow-x:auto;border-radius:var(--rs);border:1px solid var(--border)}
@@ -353,18 +328,31 @@
 
       <!-- ══ RECEIVER VIEW ══ -->
       <div class="page" id="page-receiver">
-        <div class="card" style="margin-bottom:16px">
-          <div class="card-hd" style="margin-bottom:12px">
-            <div><div class="card-title">🚚 Receiver View</div><div class="card-sub">Pending orders grouped by slot — mark as delivered after receiving</div></div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <select class="select" style="width:180px" id="rv-month" onchange="loadReceiver()"></select>
-              <button class="btn btn-outline btn-sm" onclick="loadReceiver()">↺</button>
-            </div>
+        <!-- Header bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:19px;font-weight:700">🚛 Receiver's Verification</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:3px">Mark pending deliveries as received</div>
           </div>
-          <!-- Slot filter -->
-          <div class="filter-row" id="rv-slot-filter"></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select class="select" style="width:170px" id="rv-month" onchange="loadReceiver()"></select>
+            <button class="btn btn-outline btn-sm" onclick="loadReceiver()">↺ Refresh</button>
+          </div>
         </div>
-        <div id="rv-wrap"><div class="empty"><div class="ei">🚚</div><p>Select a month to load pending orders</p></div></div>
+        <!-- ① Total Expected Items By Slot -->
+        <div class="card" style="margin-bottom:20px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <div class="card-title">📊 Total Expected Items (By Slot)</div>
+            <div id="rv-slot-filters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+          </div>
+          <div id="rv-summary-table"><div class="empty" style="padding:16px 0"><p>Select a month to see totals</p></div></div>
+        </div>
+        <div style="height:1px;background:var(--border);margin:0 0 20px"></div>
+        <!-- ② Individual Order Breakdown -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px">📦 Individual Order Breakdown</div>
+          <div id="rv-orders-list"><div class="empty"><div class="ei">🚚</div><p>Select a month above</p></div></div>
+        </div>
       </div>
 
       <!-- ══ DAILY SALES ══ -->
@@ -441,8 +429,7 @@ let products    = [];
 let months      = [];
 let slots       = [];
 let activeMonth = null;
-let rvAllOrders = [];   // receiver view cache
-let rvProducts  = [];
+let rvData       = null;  // receiver view cache
 let rvSlotFilter = 'All';
 
 // ══ INIT ═══════════════════════════════════════════════════
@@ -638,146 +625,145 @@ function resetOrderForm() {
 }
 
 // ══ RECEIVER VIEW ══════════════════════════════════════════
+let rvData       = null;
+let rvSlotFilter = 'All';
+
 async function loadReceiver() {
   const month = document.getElementById('rv-month')?.value;
-  if(!month) return;
-  const wrap=document.getElementById('rv-wrap');
-  wrap.innerHTML='<div class="loading-row"><div class="spinner"></div> Loading pending orders…</div>';
+  if (!month) return;
+  document.getElementById('rv-summary-table').innerHTML =
+    '<div class="loading-row"><div class="spinner"></div> Loading…</div>';
+  document.getElementById('rv-orders-list').innerHTML =
+    '<div class="loading-row"><div class="spinner"></div> Fetching orders…</div>';
+  document.getElementById('rv-slot-filters').innerHTML = '';
   try {
-    const d = await api(`/api/receiver/${enc(month)}`);
-    rvProducts  = d.products || [];
-    rvAllOrders = d.pending_orders || [];
-    const slotTotals = d.slot_totals || {};
-
-    // Build slot filter pills
-    const allSlots = [...new Set(rvAllOrders.map(o=>o.slot).filter(Boolean))];
-    const filterEl = document.getElementById('rv-slot-filter');
-    filterEl.innerHTML = ['All', ...allSlots].map(s=>
-      `<div class="filter-pill ${s===rvSlotFilter?'active':''}" onclick="setRvFilter('${s}',this)">${s}</div>`
-    ).join('');
-
-    renderReceiverOrders(rvAllOrders, slotTotals);
+    rvData = await api(`/api/receiver/${enc(month)}`);
+    rvSlotFilter = 'All';
+    buildRvSlotPills();
+    renderRvSummary();
+    renderRvOrders();
   } catch(e) {
-    wrap.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>${e.message}</p></div>`;
+    document.getElementById('rv-summary-table').innerHTML =
+      `<div class="empty"><div class="ei">⚠️</div><p>${e.message}</p></div>`;
+    document.getElementById('rv-orders-list').innerHTML = '';
   }
 }
 
-function setRvFilter(slot, btn) {
-  rvSlotFilter = slot;
-  document.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  // Re-render with filter
-  const filtered = slot==='All' ? rvAllOrders : rvAllOrders.filter(o=>o.slot===slot);
-  // Rebuild totals for filtered orders
-  const slotTotals = {};
-  filtered.forEach(o=>{
-    const s=o.slot;
-    if(!slotTotals[s]) slotTotals[s]={};
-    rvProducts.forEach(p=>{ slotTotals[s][p]=(slotTotals[s][p]||0)+(o.quantities[p]||0); });
-  });
-  renderReceiverOrders(filtered, slotTotals);
+function buildRvSlotPills() {
+  if (!rvData) return;
+  const slots = ['All', ...Object.keys(rvData.slot_totals || {})];
+  document.getElementById('rv-slot-filters').innerHTML = slots.map(s =>
+    `<div class="filter-pill ${s===rvSlotFilter?'active':''}"
+      onclick="setRvSlot('${s}',this)">${s==='All'?'All Slots':s}</div>`
+  ).join('');
 }
 
-function renderReceiverOrders(orders, slotTotals) {
-  const wrap=document.getElementById('rv-wrap');
-  const month=document.getElementById('rv-month')?.value;
+function setRvSlot(slot, btn) {
+  rvSlotFilter = slot;
+  document.querySelectorAll('#rv-slot-filters .filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRvSummary();
+  renderRvOrders();
+}
 
-  if(!orders.length) {
-    wrap.innerHTML='<div class="empty"><div class="ei">🎉</div><p>No pending orders!</p><small>All orders for this month have been delivered.</small></div>';
+function renderRvSummary() {
+  if (!rvData) return;
+  const products = rvData.products || [];
+  const el = document.getElementById('rv-summary-table');
+  let totals = rvSlotFilter === 'All'
+    ? (rvData.overall_totals || {})
+    : ((rvData.slot_totals || {})[rvSlotFilter] || {});
+
+  const active = products.filter(p => (totals[p] || 0) > 0);
+  if (!active.length) {
+    el.innerHTML = '<div style="padding:10px 0;font-size:13px;color:var(--text-muted)">No pending items for this slot.</div>';
+    return;
+  }
+  el.innerHTML = `<div class="tbl-wrap"><table>
+    <thead><tr>
+      <th style="text-align:left">Product Name</th>
+      <th style="text-align:right">Total Quantity</th>
+    </tr></thead>
+    <tbody>${active.map(p=>`
+      <tr>
+        <td style="text-align:left;font-family:var(--body);color:var(--text)">${p}</td>
+        <td style="text-align:right;color:var(--green);font-weight:700;font-family:var(--mono);font-size:14px">${totals[p]||0}</td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+function renderRvOrders() {
+  if (!rvData) return;
+  const month    = document.getElementById('rv-month')?.value;
+  const products = rvData.products || [];
+  const el       = document.getElementById('rv-orders-list');
+  let orders = rvData.pending_orders || [];
+  if (rvSlotFilter !== 'All') orders = orders.filter(o => (o.slot||'') === rvSlotFilter);
+
+  if (!orders.length) {
+    el.innerHTML = `<div class="empty" style="padding:24px 0"><div class="ei">🎉</div>
+      <p>No pending orders${rvSlotFilter!=='All'?' for '+rvSlotFilter:''}!</p>
+      <small>All orders delivered.</small></div>`;
     return;
   }
 
-  // Group by slot
-  const bySlot={};
-  orders.forEach(o=>{
-    const s=o.slot||'No Slot';
-    if(!bySlot[s]) bySlot[s]=[];
-    bySlot[s].push(o);
-  });
-
-  let html='';
-  for(const [slot, slotOrders] of Object.entries(bySlot)) {
-    const totals = slotTotals[slot] || {};
-    const nonZeroProds = rvProducts.filter(p=>(totals[p]||0)>0);
-
-    html+=`<div class="slot-section">
-      <div class="slot-header" onclick="toggleSlot(this)">
-        <span class="slot-tag">${slot}</span>
-        <span class="slot-title">${slot} Orders</span>
-        <span class="slot-count">${slotOrders.length} order${slotOrders.length>1?'s':''} pending</span>
-        <span class="slot-chevron">▶</span>
+  el.innerHTML = orders.map(order => {
+    const slotStr = order.slot ? ` (Slot: ${order.slot})` : '';
+    const label   = order.order_name ? `${order.order_name}${slotStr}` : `${order.account}${slotStr}`;
+    const items   = products.filter(p => (order.quantities[p]||0) > 0);
+    return `
+    <div class="rv-row" id="rvo-${order.row_index}">
+      <div class="rv-row-hd" onclick="toggleRvRow(${order.row_index})">
+        <span class="rv-chevron" id="rvch-${order.row_index}">▶</span>
+        <span style="font-size:17px">📦</span>
+        <span class="rv-row-label">${label}</span>
+        <span class="rv-row-badge">${items.length} item${items.length!==1?'s':''}</span>
       </div>
-      <div class="slot-body">`;
-
-    // Slot summary table
-    if(nonZeroProds.length) {
-      html+=`<div class="tbl-wrap" style="margin-bottom:14px"><table class="summary-tbl">
-        <thead><tr><th>Product</th><th>Total Qty Expected</th></tr></thead><tbody>`;
-      nonZeroProds.forEach(p=>{
-        html+=`<tr><td>${p}</td><td class="td-qty">${totals[p]||0}</td></tr>`;
-      });
-      html+=`</tbody></table></div>`;
-    }
-
-    // Individual order cards
-    slotOrders.forEach(order=>{
-      const items = rvProducts.filter(p=>(order.quantities[p]||0)>0);
-      html+=`<div class="order-card" id="oc-${order.row_index}">
-        <div class="order-card-hd" onclick="toggleOrder(${order.row_index})">
-          <span class="order-platform">${order.account.split(' - ')[0]||order.account}</span>
-          <div style="flex:1;min-width:0">
-            <div class="order-name">${order.order_name||order.account||'Order #'+order.row_index}</div>
-            <div class="order-acct">${order.account}</div>
-          </div>
-          <span class="order-chevron">▶</span>
+      <div class="rv-row-body" id="rvb-${order.row_index}">
+        <div class="rv-meta-bar">
+          <span><b>Account:</b> ${order.account}</span>
+          ${order.date?`<span><b>Date:</b> ${order.date}</span>`:''}
         </div>
-        <div class="order-body">
-          <div class="order-items">`;
-      items.forEach(p=>{
-        html+=`<div class="order-item"><span class="oi-name">${p}</span><span class="oi-qty">${order.quantities[p]}</span></div>`;
-      });
-      if(!items.length) html+=`<span style="font-size:12px;color:var(--text-muted)">No items</span>`;
-      html+=`</div>
-          <div class="order-actions">
-            <button class="btn btn-deliver" onclick="markDelivered('${month}',${order.row_index})">✓ Mark Delivered</button>
-            <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteOrder('${month}',${order.row_index})">🗑</button>
-          </div>
+        <div class="rv-items-grid">
+          ${items.length
+            ? items.map(p=>`<div class="rv-item">
+                <span class="rv-item-name">${p}</span>
+                <span class="rv-item-qty">${order.quantities[p]}</span>
+              </div>`).join('')
+            : '<span style="color:var(--text-muted);font-size:12px">No items found</span>'
+          }
         </div>
-      </div>`;
-    });
-
-    html+=`</div></div>`;
-  }
-  wrap.innerHTML=html;
+        <div class="rv-actions">
+          <button class="btn btn-deliver" onclick="markDelivered('${month}',${order.row_index})">✓ Mark as Delivered</button>
+          <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteRvOrder('${month}',${order.row_index})">🗑 Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function toggleSlot(hd) {
-  const body=hd.nextElementSibling;
-  const ch=hd.querySelector('.slot-chevron');
-  body.classList.toggle('collapsed');
-  ch.textContent = body.classList.contains('collapsed')?'▶':'▼';
+function toggleRvRow(idx) {
+  const body = document.getElementById('rvb-'+idx);
+  const ch   = document.getElementById('rvch-'+idx);
+  const open = body.style.display !== 'block';
+  body.style.display = open ? 'block' : 'none';
+  ch.textContent = open ? '▼' : '▶';
 }
-function toggleOrder(idx) {
-  const card=document.getElementById('oc-'+idx);
-  card.classList.toggle('open');
-}
-
 async function markDelivered(month, rowIndex) {
   try {
     await api(`/api/orders/${enc(month)}/verify`,'POST',{row_index:rowIndex});
     toast('Marked as Delivered ✓');
-    loadReceiver();
-    loadDashboard();
+    await loadReceiver(); loadDashboard();
   } catch(e){toast('Error: '+e.message,'err');}
 }
-async function deleteOrder(month, rowIndex) {
+async function deleteRvOrder(month, rowIndex) {
   if(!confirm('Delete this order row?')) return;
   try {
     await api(`/api/orders/${enc(month)}/row/${rowIndex}`,'DELETE');
-    toast('Order deleted');
-    loadReceiver();
+    toast('Deleted'); loadReceiver();
   } catch(e){toast('Error: '+e.message,'err');}
 }
+
 
 // ══ DAILY SALES ════════════════════════════════════════════
 function renderSalesProductSelect() {
