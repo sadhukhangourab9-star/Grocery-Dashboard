@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
-import json, os, traceback
+import json, os
 from datetime import datetime
 from google.oauth2.service_account import Credentials
 import gspread
@@ -12,550 +12,143 @@ SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
 ]
+
 SHEET_ID   = os.environ.get("GOOGLE_SHEET_ID", "")
 CREDS_JSON = os.environ.get("GOOGLE_CREDENTIALS_JSON", "")
 
-# ── Google Sheets client ──────────────────────────────────────────────────────
+FIXED_COLS = ["Date", "Slot", "Account", "Order Name", "Status"]
+
+def get_client():
+    raw = CREDS_JSON.strip()
+    if (raw.startswith("'") and raw.endswith("'")) or \
+       (raw.startswith('"') and raw.endswith('"')):
+        raw = raw[1:-1]
+    data  = json.loads(raw)
+    creds = Credentials.from_service_account_info(data, scopes=SCOPES)
+    return gspread.authorize(creds)
 
 def get_sheet():
-    if not CREDS_JSON:
-        raise RuntimeError("GOOGLE_CREDENTIALS_JSON env var not set")
-    if not SHEET_ID:
-        raise RuntimeError("GOOGLE_SHEET_ID env var not set")
-    # Strip surrounding quotes if pasted with them
-    creds_str = CREDS_JSON.strip().strip("'").strip('"') if CREDS_JSON.startswith("'") or CREDS_JSON.startswith('"') else CREDS_JSON
-    data  = json.loads(creds_str)
-    creds = Credentials.from_service_account_info(data, scopes=SCOPES)
-    gc    = gspread.authorize(creds)
-    return gc.open_by_key(SHEET_ID.strip())
+    return get_client().open_by_key(SHEET_ID.strip())
 
-def ws_or_create(sh, title, rows=500, cols=60):
-    try:
-        return sh.worksheet(title)
-    except gspread.WorksheetNotFound:
-        return sh.add_worksheet(title=title, rows=rows, cols=cols)
 
-# ── Sheet-name helpers ────────────────────────────────────────────────────────
-
-def inv_title(month_key):
-    """month_key like 'May_2026'  →  'Inventory_May_2026'"""
-    return f"Inventory_{month_key}"
-
-def strip_inv(title):
-    """'Inventory_May_2026' → 'May_2026' (returns None for non-inventory sheets)"""
-    if title.startswith("Inventory_"):
-        return title[len("Inventory_"):]
-    return None
-
-FIXED_SHEETS = {"Product_Master", "Slot_Master", "Sales_Log"}
-
-# ── Inventory sheet structure ─────────────────────────────────────────────────
-# Row 1  : headers  → Date | Slot | Account | Order Name | Status | <products…>
-# Row 2  : Old Stock row
-# Row 3+ : order rows  (Status = "Pending" or "Delivered")
-
-FIXED_COLS = ["Date", "Slot", "Account", "Order Name", "Status"]
-STATUS_COL = 5   # 1-based column index of Status
-
-def get_products_list(sh):
-    try:
-        vals = sh.worksheet("Product_Master").col_values(1)
-        return [v for v in vals[1:] if v.strip()]
-    except:
-        return []
-
-def get_slots_list(sh):
-    try:
-        vals = sh.worksheet("Slot_Master").col_values(1)
-        return [v for v in vals[1:] if v.strip()]
-    except:
-        return ["10 PM", "12 PM", "8 AM"]
-
-# ── /api/health ──────────────────────────────────────────────────────────────
-
+# ── /api/health ───────────────────────────────────────────────────────────────
 @app.route("/api/health")
 def health():
+    if not CREDS_JSON:
+        return jsonify({"ok": False, "error": "GOOGLE_CREDENTIALS_JSON env var not set"}), 500
+    if not SHEET_ID:
+        return jsonify({"ok": False, "error": "GOOGLE_SHEET_ID env var not set"}), 500
     try:
-        creds_set  = bool(CREDS_JSON)
-        sheet_set  = bool(SHEET_ID)
-        creds_len  = len(CREDS_JSON) if CREDS_JSON else 0
-        if not creds_set:
-            return jsonify({"ok": False, "error": "GOOGLE_CREDENTIALS_JSON not set"}), 500
-        if not sheet_set:
-            return jsonify({"ok": False, "error": "GOOGLE_SHEET_ID not set"}), 500
-
         sh     = get_sheet()
         titles = [ws.title for ws in sh.worksheets()]
-        inv    = [t for t in titles if t.startswith("Inventory_")]
-        return jsonify({
-            "ok":           True,
-            "sheet_name":   sh.title,
-            "all_sheets":   titles,
-            "inv_sheets":   inv,
-            "creds_length": creds_len,
-            "sheet_id":     SHEET_ID[:8] + "..."
-        })
+        return jsonify({"ok": True, "sheet_name": sh.title, "tabs": titles})
     except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+# ── /api/setup  (full DB initialisation) ─────────────────────────────────────
+@app.route("/api/setup", methods=["POST"])
+def setup_db():
+    """
+    Expects JSON:
+    {
+      "products": ["Product A", "Product B", ...],
+      "slots":    ["10 PM", "12 PM", ...]      (optional)
+    }
+    Creates / resets: Product_Master, Slot_Master, Sales_Log,
+    and the current-month Inventory sheet.
+    """
+    try:
+        body     = request.json or {}
+        products = [p.strip() for p in body.get("products", []) if p.strip()]
+        slots    = [s.strip() for s in body.get("slots",    []) if s.strip()]
+
+        if not products:
+            return jsonify({"error": "No products provided"}), 400
+
+        sh       = get_sheet()
+        existing = {ws.title: ws for ws in sh.worksheets()}
+
+        def get_or_create(title, rows=500, cols=60):
+            if title in existing:
+                ws = existing[title]
+                ws.clear()
+                return ws
+            return sh.add_worksheet(title=title, rows=str(rows), cols=str(cols))
+
+        # 1. Product_Master
+        ws_prod = get_or_create("Product_Master", rows=200, cols=3)
+        ws_prod.update("A1", [["Product Name"]])
+        ws_prod.update(f"A2:A{len(products)+1}", [[p] for p in products])
+
+        # 2. Slot_Master
+        if not slots:
+            slots = ["10 PM", "12 PM", "8 AM", "2 PM", "4 PM"]
+        ws_slot = get_or_create("Slot_Master", rows=20, cols=2)
+        ws_slot.update("A1", [["Slots"]])
+        ws_slot.update(f"A2:A{len(slots)+1}", [[s] for s in slots])
+
+        # 3. Sales_Log
+        ws_sales = get_or_create("Sales_Log", rows=1000, cols=5)
+        ws_sales.update("A1", [["Date", "Buyer Name", "Product Name", "Quantity Sold"]])
+
+        # 4. Current-month Inventory sheet
+        month_key = datetime.now().strftime("%b_%Y")   # e.g. May_2026
+        inv_title = f"Inventory_{month_key}"
+        headers   = FIXED_COLS + products
+        cols_needed = len(headers) + 5
+
+        ws_inv = get_or_create(inv_title, rows=500, cols=cols_needed)
+        ws_inv.update("A1", [headers])
+        old_row = ["-", "-", "Old Stock", "-", "Delivered"] + ["0"] * len(products)
+        ws_inv.update("A2", [old_row])
+
+        # Bold + colour the header row
+        try:
+            ws_inv.format("A1:ZZ1", {
+                "textFormat":      {"bold": True},
+                "backgroundColor": {"red": 0.13, "green": 0.37, "blue": 0.18}
+            })
+        except Exception:
+            pass
+
+        # Remove leftover "Sheet1" if it exists
+        try:
+            sh.del_worksheet(sh.worksheet("Sheet1"))
+        except Exception:
+            pass
+
         return jsonify({
-            "ok":           False,
-            "error":        str(e),
-            "creds_set":    bool(CREDS_JSON),
-            "sheet_set":    bool(SHEET_ID),
-            "creds_length": len(CREDS_JSON) if CREDS_JSON else 0
-        }), 500
+            "success":       True,
+            "month":         month_key,
+            "inv_sheet":     inv_title,
+            "product_count": len(products),
+            "tabs_created":  ["Product_Master", "Slot_Master", "Sales_Log", inv_title]
+        })
 
-# ── /api/products ─────────────────────────────────────────────────────────────
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
+
+# ── /api/products  (read list from sheet) ────────────────────────────────────
 @app.route("/api/products", methods=["GET"])
 def get_products():
     try:
-        sh = get_sheet()
-        ws = ws_or_create(sh, "Product_Master", rows=100, cols=2)
-        rows = ws.get_all_values()
-        products = [r[0] for r in rows if r and r[0].strip() and r[0] != "Product Name"]
-        return jsonify({"products": products})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route("/api/products", methods=["POST"])
-def save_products():
-    try:
-        products = request.json.get("products", [])
-        sh = get_sheet()
-        ws = ws_or_create(sh, "Product_Master", rows=100, cols=2)
-        ws.clear()
-        ws.update("A1", [["Product Name"]] + [[p] for p in products])
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ── /api/slots ────────────────────────────────────────────────────────────────
-
-@app.route("/api/slots", methods=["GET"])
-def get_slots():
-    try:
-        sh = get_sheet()
-        return jsonify({"slots": get_slots_list(sh)})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ── /api/months ───────────────────────────────────────────────────────────────
-
-@app.route("/api/months", methods=["GET"])
-def list_months():
-    try:
-        sh = get_sheet()
-        all_sheets = sh.worksheets()
-        keys = [strip_inv(ws.title) for ws in all_sheets if strip_inv(ws.title)]
-        return jsonify({
-            "months": keys,
-            "all_sheet_titles": [ws.title for ws in all_sheets]
-        })
-    except Exception as e:
-        return jsonify({"error": str(e), "hint": "Check GOOGLE_SHEET_ID and GOOGLE_CREDENTIALS_JSON env vars"}), 500
-
-@app.route("/api/months", methods=["POST"])
-def create_month():
-    try:
-        month_key = request.json.get("month")          # e.g. "May_2026"
-        sh        = get_sheet()
-        title     = inv_title(month_key)
-
-        existing = [ws.title for ws in sh.worksheets()]
-        if title in existing:
-            return jsonify({"error": "Month already exists"}), 400
-
-        products = get_products_list(sh)
-        headers  = FIXED_COLS + products
-
-        ws = sh.add_worksheet(title=title, rows=500, cols=len(headers) + 5)
-        ws.update("A1", [headers])
-
-        # Old Stock row — carry forward Current Stock from previous month if available
-        old_stock_qtys = [""] * len(products)
-        inv_sheets = [t for t in existing if t.startswith("Inventory_")]
-        if inv_sheets:
-            prev_ws   = sh.worksheet(inv_sheets[-1])
-            prev_data = prev_ws.get_all_values()
-            for row in prev_data:
-                if row and row[0].strip() == "Current Stock":
-                    old_stock_qtys = row[len(FIXED_COLS):]
-                    break
-
-        old_stock_row = ["-", "-", "Old Stock", "-", "Delivered"] + old_stock_qtys
-        ws.update("A2", [old_stock_row])
-
-        # Bold + green header
-        ws.format("A1:ZZ1", {
-            "textFormat": {"bold": True},
-            "backgroundColor": {"red": 0.13, "green": 0.37, "blue": 0.18}
-        })
-        return jsonify({"success": True, "month": month_key})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ── /api/sync  (one-click DB setup like Streamlit version) ───────────────────
-
-@app.route("/api/sync", methods=["POST"])
-def sync_db():
-    """Ensure all required sheets exist with correct headers for current month."""
-    try:
-        sh = get_sheet()
-        existing = {ws.title for ws in sh.worksheets()}
-
-        # Product_Master
-        if "Product_Master" not in existing:
-            ws = sh.add_worksheet(title="Product_Master", rows=100, cols=2)
-            ws.update("A1", [["Product Name"]])
-
-        # Slot_Master
-        if "Slot_Master" not in existing:
-            ws = sh.add_worksheet(title="Slot_Master", rows=20, cols=2)
-            ws.update("A1", [["Slots"], ["10 PM"], ["12 PM"], ["8 AM"], ["2 PM"], ["4 PM"]])
-
-        # Sales_Log
-        if "Sales_Log" not in existing:
-            ws = sh.add_worksheet(title="Sales_Log", rows=1000, cols=5)
-            ws.update("A1", [["Date", "Buyer Name", "Product Name", "Quantity Sold"]])
-
-        # Current month inventory sheet
-        month_key = datetime.now().strftime("%b_%Y")   # e.g. "May_2026"
-        title     = inv_title(month_key)
-        products  = get_products_list(sh)
-        headers   = FIXED_COLS + products
-
-        if not headers or len(headers) <= len(FIXED_COLS):
-            # No products yet — still create sheet with just fixed cols
-            headers = FIXED_COLS
-
-        # Re-fetch existing after possibly creating new sheets above
-        existing = {ws.title for ws in sh.worksheets()}
-
-        if title not in existing:
-            cols = max(len(headers) + 5, 20)
-            ws = sh.add_worksheet(title=title, rows=500, cols=cols)
-            ws.update("A1", [headers])
-            old_row = ["-", "-", "Old Stock", "-", "Delivered"] + ["0"] * max(0, len(headers) - len(FIXED_COLS))
-            ws.update("A2", [old_row])
-            try:
-                ws.format("A1:Z1", {
-                    "textFormat": {"bold": True},
-                    "backgroundColor": {"red": 0.13, "green": 0.37, "blue": 0.18}
-                })
-            except:
-                pass
-        else:
-            ws = sh.worksheet(title)
-            if headers:
-                ws.update("A1", [headers])
-
-        # Return all inv sheets so frontend can show them
-        all_titles = [ws2.title for ws2 in sh.worksheets()]
-        inv_months = [strip_inv(t) for t in all_titles if strip_inv(t)]
-        return jsonify({"success": True, "month": month_key, "all_months": inv_months})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ── /api/orders/<month_key> ───────────────────────────────────────────────────
-
-@app.route("/api/orders/<month_key>", methods=["GET"])
-def get_orders(month_key):
-    try:
         sh   = get_sheet()
-        ws   = sh.worksheet(inv_title(month_key))
-        data = ws.get_all_values()
-        if not data:
-            return jsonify({"headers": [], "rows": []})
-
-        headers = data[0]
-        rows    = []
-        for i, row in enumerate(data[1:], start=2):
-            if not any(c.strip() for c in row):
-                continue
-            # Pad row to header length
-            padded = row + [""] * max(0, len(headers) - len(row))
-            rows.append({
-                "row_index": i,
-                "date":       padded[0] if len(padded) > 0 else "",
-                "slot":       padded[1] if len(padded) > 1 else "",
-                "account":    padded[2] if len(padded) > 2 else "",
-                "order_name": padded[3] if len(padded) > 3 else "",
-                "status":     padded[4] if len(padded) > 4 else "",
-                "quantities": {
-                    headers[j]: padded[j]
-                    for j in range(len(FIXED_COLS), len(headers))
-                    if j < len(padded)
-                }
-            })
-        return jsonify({"headers": headers, "rows": rows, "products": headers[len(FIXED_COLS):]})
+        ws   = sh.worksheet("Product_Master")
+        vals = ws.col_values(1)
+        return jsonify({"products": [v for v in vals[1:] if v.strip()]})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route("/api/orders/<month_key>", methods=["POST"])
-def add_order(month_key):
-    try:
-        body       = request.json
-        date       = body.get("date", str(datetime.now().date()))
-        slot       = body.get("slot", "")
-        account    = body.get("account", "")
-        order_name = body.get("order_name", "")
-        quantities = body.get("quantities", {})
-
-        sh      = get_sheet()
-        ws      = sh.worksheet(inv_title(month_key))
-        headers = ws.row_values(1)
-        products = headers[len(FIXED_COLS):]
-
-        row = [date, slot, account, order_name, "Pending"]
-        row += [str(quantities.get(p, "")) for p in products]
-
-        ws.append_row(row, value_input_option="USER_ENTERED")
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ── /api/orders/<month_key>/verify ────────────────────────────────────────────
-
-@app.route("/api/orders/<month_key>/verify", methods=["POST"])
-def verify_order(month_key):
-    try:
-        row_index = request.json.get("row_index")
-        sh = get_sheet()
-        ws = sh.worksheet(inv_title(month_key))
-        ws.update_cell(row_index, STATUS_COL, "Delivered")
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ── /api/orders/<month_key>/row/<n>  DELETE ───────────────────────────────────
-
-@app.route("/api/orders/<month_key>/row/<int:row_index>", methods=["DELETE"])
-def delete_order_row(month_key, row_index):
-    try:
-        sh = get_sheet()
-        ws = sh.worksheet(inv_title(month_key))
-        ws.delete_rows(row_index)
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ── /api/receiver/<month_key>  (slot summary + pending orders) ────────────────
-
-@app.route("/api/debug/<month_key>", methods=["GET"])
-def debug_sheet(month_key):
-    """Shows raw sheet data for debugging."""
-    try:
-        sh   = get_sheet()
-        ws   = sh.worksheet(inv_title(month_key))
-        data = ws.get_all_values()
-        headers = data[0] if data else []
-        return jsonify({
-            "headers": headers,
-            "header_count": len(headers),
-            "row_count": len(data),
-            "first_3_rows": data[1:4] if len(data) > 1 else [],
-            "products_detected": headers[5:] if len(headers) > 5 else [],
-            "fixed_cols_used": 5
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e), "products": []}), 200
 
 
-@app.route("/api/receiver/<month_key>", methods=["GET"])
-def receiver_view(month_key):
-    """Returns ALL orders (pending + delivered) with slot summary."""
-    try:
-        sh   = get_sheet()
-        ws   = sh.worksheet(inv_title(month_key))
-        data = ws.get_all_values()
-        if not data:
-            return jsonify({"products": [], "all_orders": [], "pending_orders": [], "slot_totals": {}})
-
-        headers = data[0]
-
-        # Dynamically find column indices from actual header row
-        def col_idx(name):
-            """Find 0-based index of a column by name (case-insensitive)."""
-            for i, h in enumerate(headers):
-                if h.strip().lower() == name.lower():
-                    return i
-            return None
-
-        date_col   = col_idx("Date")   if col_idx("Date")   is not None else 0
-        slot_col   = col_idx("Slot")   if col_idx("Slot")   is not None else 1
-        acct_col   = col_idx("Account") if col_idx("Account") is not None else 2
-        oname_col  = col_idx("Order Name") if col_idx("Order Name") is not None else 3
-        status_col = col_idx("Status") if col_idx("Status") is not None else 4
-
-        # Products start after Status column (whichever is last of fixed cols)
-        prod_start = max(date_col, slot_col, acct_col, oname_col, status_col) + 1
-        products   = [h.strip() for h in headers[prod_start:] if h.strip()]
-
-        all_orders    = []
-        pending_orders = []
-        # Overall totals (all pending)
-        overall_totals = {p: 0 for p in products}
-        # Slot totals (pending only)
-        slot_totals    = {}
-
-        for i, row in enumerate(data[1:], start=2):
-            if not any(c.strip() for c in row):
-                continue
-            padded = row + [""] * max(0, len(headers) - len(row))
-
-            acct = padded[acct_col].strip() if acct_col < len(padded) else ""
-            # Skip structural rows
-            if acct.lower() in ("old stock", "current stock", ""):
-                continue
-
-            date       = padded[date_col].strip()   if date_col < len(padded)  else ""
-            slot       = padded[slot_col].strip()   if slot_col < len(padded)  else ""
-            order_name = padded[oname_col].strip()  if oname_col < len(padded) else ""
-            status     = padded[status_col].strip() if status_col < len(padded) else "Pending"
-
-            qtys = {}
-            for j, p in enumerate(products):
-                col = prod_start + j
-                val = padded[col].strip() if col < len(padded) else ""
-                try:
-                    qtys[p] = int(float(val)) if val else 0
-                except:
-                    qtys[p] = 0
-
-            order = {
-                "row_index":  i,
-                "date":       date,
-                "slot":       slot,
-                "account":    acct,
-                "order_name": order_name,
-                "status":     status,
-                "quantities": qtys
-            }
-            all_orders.append(order)
-
-            if status.lower() == "pending":
-                pending_orders.append(order)
-                # Slot totals
-                if slot not in slot_totals:
-                    slot_totals[slot] = {p: 0 for p in products}
-                for p, q in qtys.items():
-                    slot_totals[slot][p] = slot_totals[slot].get(p, 0) + q
-                # Overall totals
-                for p, q in qtys.items():
-                    overall_totals[p] = overall_totals.get(p, 0) + q
-
-        return jsonify({
-            "products":       products,
-            "all_orders":     all_orders,
-            "pending_orders": pending_orders,
-            "slot_totals":    slot_totals,
-            "overall_totals": overall_totals,
-            "pending_count":  len(pending_orders),
-            "total_count":    len(all_orders)
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ── /api/sales/<month_key> ────────────────────────────────────────────────────
-
-@app.route("/api/sales/<month_key>", methods=["POST"])
-def log_sale(month_key):
-    """Append a single sale entry to Sales_Log."""
-    try:
-        body    = request.json
-        buyer   = body.get("buyer", "")
-        product = body.get("product", "")
-        qty     = body.get("qty", 0)
-        date    = body.get("date", str(datetime.now().date()))
-
-        sh = get_sheet()
-        ws = ws_or_create(sh, "Sales_Log", rows=1000, cols=5)
-        ws.append_row([date, buyer, product, qty], value_input_option="USER_ENTERED")
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ── /api/dashboard/<month_key> ───────────────────────────────────────────────
-
-@app.route("/api/dashboard/<month_key>", methods=["GET"])
-def dashboard(month_key):
-    try:
-        sh   = get_sheet()
-        ws   = sh.worksheet(inv_title(month_key))
-        data = ws.get_all_values()
-        if not data:
-            return jsonify({"products": [], "delivered": {}, "pending": {}, "order_count": 0, "pending_count": 0, "delivered_count": 0})
-
-        headers  = data[0]
-        products = headers[len(FIXED_COLS):]
-
-        delivered_qty = {p: 0 for p in products}
-        pending_qty   = {p: 0 for p in products}
-        order_count = delivered_count = pending_count = 0
-
-        for row in data[1:]:
-            if not any(c.strip() for c in row):
-                continue
-            padded = row + [""] * max(0, len(headers) - len(row))
-            acct   = padded[2].strip()
-            status = padded[4].strip().lower() if len(padded) > 4 else ""
-
-            if acct in ("Old Stock", "Current Stock", ""):
-                continue
-            order_count += 1
-
-            for j, p in enumerate(products):
-                col = len(FIXED_COLS) + j
-                val = padded[col] if col < len(padded) else ""
-                try:
-                    n = int(val) if val else 0
-                except:
-                    n = 0
-                if status == "delivered":
-                    delivered_qty[p] += n
-                else:
-                    pending_qty[p] += n
-
-            if status == "delivered":
-                delivered_count += 1
-            else:
-                pending_count += 1
-
-        # Current stock from Old Stock row + all delivered
-        old_stock = {p: 0 for p in products}
-        for row in data[1:]:
-            if row and row[2].strip() == "Old Stock":
-                padded = row + [""] * max(0, len(headers) - len(row))
-                for j, p in enumerate(products):
-                    col = len(FIXED_COLS) + j
-                    try:
-                        old_stock[p] = int(padded[col]) if col < len(padded) and padded[col] else 0
-                    except:
-                        old_stock[p] = 0
-                break
-
-        current_stock = {p: old_stock[p] + delivered_qty[p] for p in products}
-
-        return jsonify({
-            "products":       products,
-            "current_stock":  current_stock,
-            "delivered":      delivered_qty,
-            "pending":        pending_qty,
-            "order_count":    order_count,
-            "pending_count":  pending_count,
-            "delivered_count": delivered_count
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ── Frontend ──────────────────────────────────────────────────────────────────
-
-with open(os.path.join(os.path.dirname(__file__), "templates", "index.html"), encoding="utf-8") as _f:
-    _HTML = _f.read()
+# ── frontend ──────────────────────────────────────────────────────────────────
+TEMPLATE = os.path.join(os.path.dirname(__file__), "templates", "index.html")
 
 @app.route("/")
 def index():
-    return Response(_HTML, mimetype="text/html")
+    with open(TEMPLATE, encoding="utf-8") as f:
+        return Response(f.read(), mimetype="text/html")
 
 if __name__ == "__main__":
     app.run(debug=True)
