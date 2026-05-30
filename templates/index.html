@@ -437,6 +437,25 @@ let rvSlotFilter = 'All';
 async function init() {
   document.getElementById('o-date').value  = today();
   document.getElementById('sl-date').value = today();
+
+  // First check health before doing anything else
+  try {
+    const h = await fetch('/api/health');
+    const hd = await h.json();
+    if (!hd.ok) {
+      document.getElementById('month-list').innerHTML =
+        `<div style="padding:10px 12px;font-size:11px;color:var(--red)">
+          ⚠ Sheets error:<br>${hd.error||'unknown'}<br>
+          <span style="color:var(--text-muted)">Check env vars in Render</span>
+        </div>`;
+      return;
+    }
+  } catch(e) {
+    document.getElementById('month-list').innerHTML =
+      `<div style="padding:10px 12px;font-size:11px;color:var(--red)">⚠ Server unreachable</div>`;
+    return;
+  }
+
   await Promise.all([loadProducts(), loadMonths(), loadSlots()]);
   if (months.length) selectMonth(months[months.length - 1]);
 }
@@ -581,13 +600,27 @@ async function createMonth() {
 }
 
 async function syncDB() {
-  toast('Syncing database…');
+  document.getElementById('month-list').innerHTML =
+    '<div class="loading-row"><div class="spinner"></div> Syncing…</div>';
   try {
     const d = await api('/api/sync','POST');
-    toast(`DB synced — ${d.month} ready ✓`);
-    await loadMonths();
-    if (months.length) selectMonth(months[months.length-1]);
-  } catch(e) { toast('Sync error: '+e.message,'err'); }
+    // Sync returns all_months directly so we can update immediately
+    if (d.all_months && d.all_months.length) {
+      months = d.all_months;
+      renderMonthList();
+      syncMonthSelects();
+      selectMonth(months[months.length - 1]);
+      toast(`Synced ✓ — ${d.month} is active`);
+    } else {
+      await loadMonths();
+      if (months.length) selectMonth(months[months.length - 1]);
+      toast('Sync done ✓');
+    }
+  } catch(e) {
+    document.getElementById('month-list').innerHTML =
+      `<div style="padding:10px 12px;font-size:11px;color:var(--red)">⚠ ${e.message}</div>`;
+    toast('Sync error: '+e.message,'err');
+  }
 }
 
 // ══ ADD ORDER ══════════════════════════════════════════════
