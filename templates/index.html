@@ -211,6 +211,7 @@
     <div class="month-list" id="month-list"><div class="loading-row"><div class="spinner"></div> Loading…</div></div>
     <div class="sidebar-footer" style="display:flex;flex-direction:column;gap:6px">
       <button class="btn btn-outline btn-full btn-sm" onclick="openNewMonthModal()">+ New Month</button>
+      <button class="btn btn-outline btn-full btn-sm" onclick="retryLoadMonths()" style="color:var(--blue);border-color:rgba(88,166,255,.3)">↺ Reload Months</button>
       <button class="btn btn-outline btn-full btn-sm" onclick="syncDB()" style="color:var(--yellow);border-color:rgba(210,153,34,.4)">⚡ Sync DB</button>
     </div>
   </aside>
@@ -434,9 +435,16 @@ let rvSlotFilter = 'All';
 
 // ══ INIT ═══════════════════════════════════════════════════
 async function init() {
-  document.getElementById('o-date').value   = today();
-  document.getElementById('sl-date').value  = today();
+  document.getElementById('o-date').value  = today();
+  document.getElementById('sl-date').value = today();
   await Promise.all([loadProducts(), loadMonths(), loadSlots()]);
+  if (months.length) selectMonth(months[months.length - 1]);
+}
+
+async function retryLoadMonths() {
+  document.getElementById('month-list').innerHTML =
+    '<div class="loading-row"><div class="spinner"></div> Retrying…</div>';
+  await loadMonths();
   if (months.length) selectMonth(months[months.length - 1]);
 }
 
@@ -521,13 +529,24 @@ async function loadSlots() {
 
 // ══ MONTHS ═════════════════════════════════════════════════
 async function loadMonths() {
-  try { const d = await api('/api/months'); months = d.months || []; }
-  catch { months = []; }
-  renderMonthList(); syncMonthSelects();
+  try {
+    const d = await api('/api/months');
+    months = d.months || [];
+    if (!months.length) {
+      document.getElementById('month-list').innerHTML =
+        '<div style="padding:10px 12px;font-size:11.5px;color:var(--text-muted)">No months found.<br><span style="color:var(--yellow)">Click ⚡ Sync DB first.</span></div>';
+    }
+  } catch(e) {
+    months = [];
+    document.getElementById('month-list').innerHTML =
+      `<div style="padding:10px 12px;font-size:11.5px;color:var(--red)">⚠ ${e.message}</div>`;
+  }
+  renderMonthList();
+  syncMonthSelects();
 }
 function renderMonthList() {
   const el = document.getElementById('month-list');
-  if (!months.length) { el.innerHTML='<div style="padding:10px;font-size:12px;color:var(--text-muted)">No months yet.</div>'; return; }
+  if (!months.length) return; // already handled by loadMonths with specific msg
   el.innerHTML = months.map(m => `
     <div class="month-chip ${m===activeMonth?'active':''}" data-m="${m}" onclick="selectMonth('${m}')">
       <span>${m.replace('_',' ')}</span>
@@ -536,6 +555,10 @@ function renderMonthList() {
 function syncMonthSelects() {
   ['o-month','rv-month'].forEach(id => {
     const el=document.getElementById(id); if(!el) return;
+    if (!months.length) {
+      el.innerHTML = '<option value="">— No months —</option>';
+      return;
+    }
     el.innerHTML = months.map(m=>`<option value="${m}">${m.replace('_',' ')}</option>`).join('');
     if(activeMonth) el.value=activeMonth;
   });
@@ -559,8 +582,12 @@ async function createMonth() {
 
 async function syncDB() {
   toast('Syncing database…');
-  try { const d=await api('/api/sync','POST'); toast(`DB synced — active month: ${d.month} ✓`); await loadMonths(); }
-  catch(e){toast('Sync error: '+e.message,'err');}
+  try {
+    const d = await api('/api/sync','POST');
+    toast(`DB synced — ${d.month} ready ✓`);
+    await loadMonths();
+    if (months.length) selectMonth(months[months.length-1]);
+  } catch(e) { toast('Sync error: '+e.message,'err'); }
 }
 
 // ══ ADD ORDER ══════════════════════════════════════════════
