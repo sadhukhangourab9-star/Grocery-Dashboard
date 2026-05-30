@@ -7,181 +7,180 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:#0d1117; --surface:#161b22; --surface2:#1c2230; --surface3:#222b3a;
-      --border:#2a3548; --green:#3fb950; --green-dim:#173d20; --green-bright:#56d364;
-      --yellow:#d29922; --red:#f85149; --blue:#58a6ff;
+      --bg:#0d1117; --surface:#161b22; --s2:#1c2230; --s3:#222b3a;
+      --border:#2a3548; --green:#3fb950; --gdim:#173d20; --gbright:#56d364;
+      --yellow:#d29922; --ybg:#2e2108; --red:#f85149; --rbg:#2d1214;
+      --blue:#58a6ff; --bbg:#0c1f3b;
       --text:#e6edf3; --muted:#7d8590; --dim:#484f58;
       --mono:'Space Mono',monospace; --body:'DM Sans',sans-serif;
       --r:8px; --rs:5px;
     }
-    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0 }
-    body { background:var(--bg); color:var(--text); font-family:var(--body); min-height:100vh; display:flex; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;display:flex}
 
     /* ── SIDEBAR ── */
-    .sidebar {
-      width:300px; flex-shrink:0; background:var(--surface);
-      border-right:1px solid var(--border); display:flex;
-      flex-direction:column; height:100vh; overflow-y:auto; position:sticky; top:0;
-    }
-    .brand { padding:20px 18px 16px; border-bottom:1px solid var(--border); }
-    .brand h1 { font-family:var(--mono); font-size:13px; color:var(--green); letter-spacing:.1em; text-transform:uppercase; }
-    .brand p  { font-size:11px; color:var(--muted); margin-top:3px; font-family:var(--mono); }
+    .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;position:sticky;top:0}
+    .brand{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+    .brand h1{font-family:var(--mono);font-size:12px;color:var(--green);letter-spacing:.1em;text-transform:uppercase}
+    .brand p{font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
 
-    /* Connection status */
-    .conn-bar {
-      margin:14px 14px 0;
-      padding:10px 14px;
-      border-radius:var(--rs);
-      border:1px solid var(--border);
-      background:var(--surface2);
-      font-size:12px;
-      display:flex; align-items:center; gap:8px;
-    }
-    .conn-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-    .conn-dot.ok  { background:var(--green); animation:pulse 2s infinite; }
-    .conn-dot.err { background:var(--red); }
-    .conn-dot.checking { background:var(--yellow); animation:pulse .8s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-    .conn-text { flex:1; color:var(--muted); }
-    .conn-text b { color:var(--text); display:block; font-size:11.5px; }
+    /* Connection */
+    .conn-bar{margin:12px 12px 0;padding:9px 12px;border-radius:var(--rs);border:1px solid var(--border);background:var(--s2);font-size:11.5px;display:flex;align-items:center;gap:8px}
+    .conn-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .conn-dot.ok{background:var(--green);animation:pulse 2s infinite}
+    .conn-dot.err{background:var(--red)}
+    .conn-dot.spin{background:var(--yellow);animation:pulse .8s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .conn-info{flex:1;min-width:0}
+    .conn-info b{color:var(--text);display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .conn-info span{color:var(--muted);font-size:10px}
 
-    /* Setup panel */
-    .setup-panel { padding:16px 14px; flex:1; }
-    .setup-title {
-      font-size:13px; font-weight:700; color:var(--text);
-      margin-bottom:14px; display:flex; align-items:center; gap:8px;
-    }
-    .setup-title .badge {
-      font-size:9px; font-family:var(--mono); background:var(--green-dim);
-      color:var(--green); padding:2px 7px; border-radius:10px; letter-spacing:.06em;
-    }
+    /* Nav */
+    .nav{padding:10px 0}
+    .nav-label{padding:10px 16px 4px;font-size:10px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;font-family:var(--mono)}
+    .nav-item{display:flex;align-items:center;gap:9px;padding:9px 16px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .12s;border-left:2px solid transparent}
+    .nav-item:hover{color:var(--text);background:var(--s2)}
+    .nav-item.active{color:var(--green);border-left-color:var(--green);background:rgba(63,185,80,.07);font-weight:600}
+    .nav-item .ni{width:17px;text-align:center;font-size:14px}
 
-    label { font-size:11px; color:var(--muted); display:block; margin-bottom:5px; font-weight:500; letter-spacing:.03em; }
-    .input, .textarea {
-      background:var(--surface3); border:1px solid var(--border);
-      border-radius:var(--rs); color:var(--text); font-family:var(--body);
-      font-size:12.5px; padding:8px 11px; outline:none;
-      transition:border .12s; width:100%;
-    }
-    .input:focus, .textarea:focus { border-color:var(--green); }
-    .textarea { resize:vertical; min-height:280px; font-size:12px; line-height:1.6; }
-    .form-group { margin-bottom:14px; }
-    .hint { font-size:10.5px; color:var(--dim); margin-top:4px; line-height:1.5; }
-
-    .slots-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
-    .slot-chip {
-      padding:4px 10px; border-radius:20px; font-size:11px;
-      border:1px solid var(--border); background:var(--surface3);
-      color:var(--muted); cursor:pointer; font-family:var(--mono);
-      transition:all .12s; user-select:none;
-    }
-    .slot-chip.on { border-color:var(--green); color:var(--green); background:var(--green-dim); }
-
-    .btn {
-      display:inline-flex; align-items:center; justify-content:center;
-      gap:7px; padding:9px 16px; border-radius:var(--rs);
-      font-size:13px; font-family:var(--body); font-weight:600;
-      cursor:pointer; border:none; transition:all .12s; white-space:nowrap;
-    }
-    .btn-setup {
-      width:100%; background:var(--green); color:#0d1117;
-      font-size:13px; padding:11px;
-    }
-    .btn-setup:hover { background:var(--green-bright); }
-    .btn-setup:disabled { opacity:.4; cursor:not-allowed; }
-    .btn-outline {
-      background:transparent; color:var(--muted);
-      border:1px solid var(--border); font-size:12px; padding:7px 12px;
-    }
-    .btn-outline:hover { border-color:var(--green); color:var(--green); }
-
-    .divider { height:1px; background:var(--border); margin:14px 0; }
-
-    /* Product counter */
-    .prod-counter {
-      display:flex; align-items:center; justify-content:space-between;
-      margin-bottom:6px;
-    }
-    .prod-count-badge {
-      font-family:var(--mono); font-size:10px;
-      background:var(--surface3); border:1px solid var(--border);
-      color:var(--muted); padding:2px 8px; border-radius:10px;
-    }
+    /* DB Setup in sidebar */
+    .setup-section{padding:12px;border-top:1px solid var(--border);margin-top:auto}
+    .setup-toggle{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--rs);cursor:pointer;font-size:12.5px;color:var(--muted);border:1px solid var(--border);background:var(--s2);transition:all .12s}
+    .setup-toggle:hover{border-color:var(--yellow);color:var(--yellow)}
+    .setup-drawer{display:none;margin-top:10px}
+    .setup-drawer.open{display:block}
 
     /* ── MAIN ── */
-    .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-    .topbar {
-      background:var(--surface); border-bottom:1px solid var(--border);
-      padding:0 28px; height:52px; display:flex; align-items:center;
-      justify-content:space-between; flex-shrink:0;
-    }
-    .tb-title { font-size:13px; font-weight:600; }
-    .tb-sub   { font-size:11px; color:var(--muted); }
-    .content  { flex:1; overflow-y:auto; padding:32px; }
+    .main{flex:1;display:flex;flex-direction:column;min-height:100vh;overflow:hidden}
+    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .tb-title{font-size:14px;font-weight:600}
+    .tb-date{font-size:12px;color:var(--muted);font-family:var(--mono)}
+    .content{flex:1;overflow-y:auto;padding:24px}
 
-    /* Setup result card */
-    .result-card {
-      max-width:600px; margin:0 auto;
-      background:var(--surface); border:1px solid var(--border);
-      border-radius:var(--r); padding:28px;
-    }
-    .result-card.success { border-color:rgba(63,185,80,.4); }
-    .result-card.error   { border-color:rgba(248,81,73,.4); }
+    /* Pages */
+    .page{display:none} .page.active{display:block}
 
-    .result-icon { font-size:40px; margin-bottom:12px; }
-    .result-title { font-size:18px; font-weight:700; margin-bottom:8px; }
-    .result-sub   { font-size:13px; color:var(--muted); margin-bottom:20px; }
+    /* ── CARDS ── */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:20px}
+    .card-title{font-size:15px;font-weight:700;margin-bottom:4px}
+    .card-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
 
-    .tabs-list { display:flex; flex-direction:column; gap:8px; }
-    .tab-row {
-      display:flex; align-items:center; gap:10px;
-      background:var(--surface2); border:1px solid var(--border);
-      border-radius:var(--rs); padding:10px 14px; font-size:13px;
-    }
-    .tab-row .ti { font-size:16px; }
-    .tab-row .tn { flex:1; font-weight:500; }
-    .tab-row .td { font-size:11px; color:var(--muted); font-family:var(--mono); }
-    .tab-row.done { border-color:rgba(63,185,80,.3); background:rgba(63,185,80,.05); }
+    /* ── FORM ── */
+    label{font-size:11.5px;color:var(--muted);display:block;margin-bottom:5px;font-weight:500}
+    .input,.select,.textarea{background:var(--s2);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:var(--body);font-size:13px;padding:9px 12px;outline:none;transition:border .12s;width:100%}
+    .input:focus,.select:focus,.textarea:focus{border-color:var(--green)}
+    .select option{background:var(--s2)}
+    .textarea{resize:vertical;min-height:180px;font-size:12px;line-height:1.6}
+    .form-group{margin-bottom:16px}
+    .form-row{display:grid;gap:14px}
+    .col2{grid-template-columns:1fr 1fr}
+    .col3{grid-template-columns:1fr 1fr 1fr}
+    .divider{height:1px;background:var(--border);margin:18px 0}
+    .hint{font-size:10.5px;color:var(--dim);margin-top:4px;line-height:1.5}
 
-    .next-steps {
-      margin-top:20px; padding:14px 16px;
-      background:var(--surface2); border-radius:var(--rs);
-      border:1px solid var(--border); font-size:12.5px; color:var(--muted);
-      line-height:1.8;
-    }
-    .next-steps b { color:var(--text); }
+    /* Slot pills */
+    .slot-pills{display:flex;flex-wrap:wrap;gap:7px}
+    .slot-pill{padding:7px 16px;border-radius:20px;font-size:12.5px;border:1px solid var(--border);background:var(--s2);color:var(--muted);cursor:pointer;font-family:var(--mono);transition:all .12s;user-select:none}
+    .slot-pill:hover{border-color:var(--green);color:var(--green)}
+    .slot-pill.active{border-color:var(--green);color:var(--green);background:var(--gdim);font-weight:700}
 
-    /* Idle state */
-    .idle-state {
-      max-width:520px; margin:60px auto 0; text-align:center; color:var(--muted);
-    }
-    .idle-state .big { font-size:52px; margin-bottom:16px; }
-    .idle-state h2   { font-size:18px; font-weight:700; color:var(--text); margin-bottom:8px; }
-    .idle-state p    { font-size:13px; line-height:1.7; }
-    .arrow { font-size:28px; margin-top:20px; color:var(--green); animation:bob 1.5s ease-in-out infinite; }
-    @keyframes bob { 0%,100%{transform:translateX(-8px)} 50%{transform:translateX(8px)} }
+    /* Toggle slot chips in setup */
+    .slot-chip{padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid var(--border);background:var(--s3);color:var(--muted);cursor:pointer;font-family:var(--mono);transition:all .12s;user-select:none}
+    .slot-chip.on{border-color:var(--green);color:var(--green);background:var(--gdim)}
 
-    /* Spinner */
-    .spinner { width:16px; height:16px; border:2px solid rgba(13,17,23,.3); border-top-color:#0d1117; border-radius:50%; animation:spin .6s linear infinite; }
-    @keyframes spin { to{transform:rotate(360deg)} }
+    /* ── BUTTONS ── */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border-radius:var(--rs);font-size:13px;font-family:var(--body);font-weight:600;cursor:pointer;border:none;transition:all .12s;white-space:nowrap}
+    .btn-primary{background:var(--green);color:#0d1117} .btn-primary:hover{background:var(--gbright)}
+    .btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border)} .btn-outline:hover{border-color:var(--green);color:var(--green)}
+    .btn-yellow{background:rgba(210,153,34,.15);color:var(--yellow);border:1px solid rgba(210,153,34,.3)} .btn-yellow:hover{background:rgba(210,153,34,.25)}
+    .btn-full{width:100%} .btn-sm{padding:5px 12px;font-size:12px}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+
+    /* ── QTY TABLE ── */
+    .qty-wrap{border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;max-height:460px;overflow-y:auto}
+    .qty-row{display:grid;grid-template-columns:1fr 90px;align-items:center;padding:8px 14px;border-bottom:1px solid rgba(42,53,72,.4)}
+    .qty-row:last-child{border-bottom:none}
+    .qty-row:nth-child(even){background:rgba(28,34,48,.4)}
+    .qty-name{font-size:13px}
+    .qty-input{background:var(--s2);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-size:13px;padding:5px 8px;text-align:center;outline:none;font-family:var(--mono);width:100%;transition:border .12s}
+    .qty-input:focus{border-color:var(--green)}
+    .qty-input.has{border-color:var(--green);color:var(--gbright)}
+    .qty-count{font-size:11.5px;color:var(--muted);margin-bottom:8px;font-family:var(--mono)}
+
+    /* ── RECEIVER VIEW ── */
+    .rv-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+
+    /* Summary table */
+    .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--rs);margin-bottom:18px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    thead th{background:var(--s2);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.07em;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+    thead th:last-child{text-align:right}
+    tbody td{padding:9px 14px;border-bottom:1px solid rgba(42,53,72,.4);font-size:13px}
+    tbody td:last-child{text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover td{background:rgba(255,255,255,.02)}
+
+    /* Order accordion rows */
+    .order-row{border:1px solid var(--border);border-radius:var(--rs);margin-bottom:8px;overflow:hidden;background:var(--surface)}
+    .order-hd{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;transition:background .12s;user-select:none}
+    .order-hd:hover{background:var(--s2)}
+    .order-chevron{color:var(--muted);font-size:11px;width:14px;flex-shrink:0;transition:transform .15s}
+    .order-row.open .order-chevron{transform:rotate(90deg)}
+    .order-label{flex:1;font-size:13.5px;font-weight:500}
+    .order-slot-badge{font-family:var(--mono);font-size:11px;background:var(--bbg);color:var(--blue);border:1px solid rgba(88,166,255,.2);padding:2px 9px;border-radius:20px;flex-shrink:0}
+    .order-items-count{font-size:11px;color:var(--muted);font-family:var(--mono);background:var(--s2);border:1px solid var(--border);padding:2px 8px;border-radius:10px;flex-shrink:0}
+
+    .order-body{display:none;padding:14px 16px 16px;border-top:1px solid var(--border);background:var(--s2)}
+    .order-row.open .order-body{display:block}
+    .order-meta{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:12px}
+    .order-meta b{color:var(--text)}
+    .order-items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:7px;margin-bottom:14px}
+    .order-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:8px 12px}
+    .oi-name{font-size:12.5px;color:var(--muted);flex:1;padding-right:8px}
+    .oi-qty{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--gbright);flex-shrink:0}
+    .order-actions{display:flex;gap:8px;align-items:center}
+    .btn-deliver{background:var(--gdim);color:var(--green);border:1px solid rgba(63,185,80,.3);padding:7px 16px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;transition:all .12s;font-family:var(--body)}
+    .btn-deliver:hover{background:rgba(63,185,80,.2)}
+    .delivered-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(63,185,80,.1);color:var(--green);border:1px solid rgba(63,185,80,.2);padding:5px 12px;border-radius:var(--rs);font-size:12.5px}
+
+    /* Stats row */
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+    .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:16px 18px}
+    .stat-lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
+    .stat-val{font-family:var(--mono);font-size:24px;font-weight:700}
+
+    /* Setup result */
+    .result-card{max-width:560px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px}
+    .result-card.ok{border-color:rgba(63,185,80,.35)}
+    .result-card.fail{border-color:rgba(248,81,73,.35)}
+    .tabs-list{display:flex;flex-direction:column;gap:8px}
+    .tab-row{display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid rgba(63,185,80,.2);border-radius:var(--rs);padding:10px 14px}
+
+    /* Prod count badge */
+    .prod-counter{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+    .prod-badge{font-family:var(--mono);font-size:10px;background:var(--s3);border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:10px}
+
+    /* Empty / idle */
+    .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+    .empty .ei{font-size:44px;margin-bottom:14px}
+    .empty h3{font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px}
+    .empty p{font-size:13px;line-height:1.7}
 
     /* Toast */
-    #toast {
-      position:fixed; bottom:24px; right:24px;
-      background:var(--surface2); border:1px solid var(--green);
-      color:var(--green); padding:11px 18px; border-radius:var(--r);
-      font-size:13px; z-index:999; display:none;
-      box-shadow:0 4px 20px rgba(0,0,0,.5);
-    }
-    #toast.err { border-color:var(--red); color:var(--red); }
+    #toast{position:fixed;bottom:24px;right:24px;background:var(--s2);border:1px solid var(--green);color:var(--green);padding:11px 18px;border-radius:var(--r);font-size:13px;z-index:999;display:none;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+    #toast.err{border-color:var(--red);color:var(--red)}
 
-    ::-webkit-scrollbar { width:4px; }
-    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+    .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading{display:flex;align-items:center;gap:10px;padding:20px;color:var(--muted);font-size:13px}
+
+    ::-webkit-scrollbar{width:4px;height:4px}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
   </style>
 </head>
 <body>
 
-<!-- ── SIDEBAR ── -->
+<!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
   <div class="brand">
     <h1>🛒 Grocery DB</h1>
@@ -190,32 +189,42 @@
 
   <!-- Connection status -->
   <div class="conn-bar" id="conn-bar">
-    <div class="conn-dot checking" id="conn-dot"></div>
-    <div class="conn-text">
-      <b id="conn-title">Checking connection…</b>
+    <div class="conn-dot spin" id="conn-dot"></div>
+    <div class="conn-info">
+      <b id="conn-title">Checking…</b>
       <span id="conn-sub"></span>
     </div>
   </div>
 
-  <!-- DB Setup Panel -->
-  <div class="setup-panel">
-    <div class="setup-title">
-      🗄️ DB Setup
-      <span class="badge">STEP 1</span>
+  <!-- Main Navigation -->
+  <nav class="nav">
+    <div class="nav-label">Menu</div>
+    <div class="nav-item active" id="nav-order" onclick="showPage('order')">
+      <span class="ni">➕</span> Add Order
     </div>
+    <div class="nav-item" id="nav-receiver" onclick="showPage('receiver')">
+      <span class="ni">🚚</span> Receiver View
+    </div>
+  </nav>
 
-    <!-- Products textarea -->
-    <div class="form-group">
-      <div class="prod-counter">
-        <label style="margin:0">Products List</label>
-        <span class="prod-count-badge" id="prod-count">0 products</span>
-      </div>
-      <textarea
-        class="textarea"
-        id="products-input"
-        placeholder="One product per line:&#10;Fortune Mustard pouch&#10;Fortune Mustard Bottle&#10;Fortune Soya pouch&#10;..."
-        oninput="updateProdCount()"
-      >Fortune Mustard pouch
+  <!-- DB Setup (collapsible at bottom) -->
+  <div class="setup-section">
+    <div class="setup-toggle" onclick="toggleSetup()">
+      <span>🗄️</span>
+      <span style="flex:1;font-size:12.5px">DB Setup</span>
+      <span id="setup-arrow" style="font-size:11px">▶</span>
+    </div>
+    <div class="setup-drawer" id="setup-drawer">
+      <div style="padding:10px 2px 0">
+
+        <div class="form-group">
+          <div class="prod-counter">
+            <label style="margin:0">Products</label>
+            <span class="prod-badge" id="prod-count">0</span>
+          </div>
+          <textarea class="textarea" id="products-input" style="min-height:160px;font-size:11.5px"
+            oninput="updateProdCount()"
+          >Fortune Mustard pouch
 Fortune Mustard Bottle
 Fortune Soya pouch
 Fortune Ricebran
@@ -245,240 +254,497 @@ Godrej fab 1L
 Tata Tea 100gm
 Dalda
 Ashirbad atta 5kg</textarea>
-      <div class="hint">One product per line. Add/remove products here, then click Setup.</div>
-    </div>
+          <div class="hint">One per line. Edit &amp; re-run to update.</div>
+        </div>
 
-    <div class="divider"></div>
+        <div class="form-group">
+          <label>Slots</label>
+          <div style="display:flex;flex-wrap:wrap;gap:5px" id="setup-slots">
+            <div class="slot-chip on" data-s="10 PM" onclick="this.classList.toggle('on')">10 PM</div>
+            <div class="slot-chip on" data-s="12 PM" onclick="this.classList.toggle('on')">12 PM</div>
+            <div class="slot-chip on" data-s="8 AM"  onclick="this.classList.toggle('on')">8 AM</div>
+            <div class="slot-chip on" data-s="2 PM"  onclick="this.classList.toggle('on')">2 PM</div>
+            <div class="slot-chip on" data-s="4 PM"  onclick="this.classList.toggle('on')">4 PM</div>
+          </div>
+        </div>
 
-    <!-- Slots -->
-    <div class="form-group">
-      <label>Delivery Slots</label>
-      <div class="slots-row" id="slots-row">
-        <div class="slot-chip on" data-slot="10 PM"  onclick="toggleSlot(this)">10 PM</div>
-        <div class="slot-chip on" data-slot="12 PM"  onclick="toggleSlot(this)">12 PM</div>
-        <div class="slot-chip on" data-slot="8 AM"   onclick="toggleSlot(this)">8 AM</div>
-        <div class="slot-chip on" data-slot="2 PM"   onclick="toggleSlot(this)">2 PM</div>
-        <div class="slot-chip on" data-slot="4 PM"   onclick="toggleSlot(this)">4 PM</div>
+        <button class="btn btn-yellow btn-full btn-sm" id="setup-btn" onclick="runSetup()">
+          ⚡ Run Setup
+        </button>
+        <div id="setup-result" style="margin-top:8px;font-size:11.5px"></div>
       </div>
-      <div class="hint">Click to toggle slots on/off.</div>
     </div>
-
-    <div class="divider"></div>
-
-    <button class="btn btn-setup" id="setup-btn" onclick="runSetup()">
-      ⚡ Setup Database
-    </button>
-
-    <div style="margin-top:10px">
-      <button class="btn btn-outline" style="width:100%" onclick="checkHealth()">
-        ↺ Check Connection
-      </button>
-    </div>
-
   </div>
 </aside>
 
-<!-- ── MAIN ── -->
+<!-- ══ MAIN ══ -->
 <div class="main">
   <div class="topbar">
-    <div>
-      <div class="tb-title">Grocery Dashboard</div>
-      <div class="tb-sub" id="tb-sub">Complete DB Setup to get started</div>
-    </div>
+    <div class="tb-title" id="tb-title">Add Order</div>
+    <div class="tb-date" id="tb-date"></div>
   </div>
-
   <div class="content">
-    <div id="main-content">
-      <div class="idle-state">
-        <div class="big">🗄️</div>
-        <h2>Setup Your Database First</h2>
-        <p>
-          Your product list is ready in the sidebar.<br>
-          Add or remove products, then click<br>
-          <strong style="color:var(--green)">⚡ Setup Database</strong><br>
-          to create all the Google Sheets tabs.
-        </p>
-        <div class="arrow">←</div>
+
+    <!-- ── ADD ORDER PAGE ── -->
+    <div class="page active" id="page-order">
+      <div id="order-content">
+        <div class="loading"><div class="spinner" style="color:var(--green)"></div> Loading products…</div>
       </div>
     </div>
+
+    <!-- ── RECEIVER VIEW PAGE ── -->
+    <div class="page" id="page-receiver">
+      <div id="receiver-content">
+        <div class="loading"><div class="spinner" style="color:var(--green)"></div> Loading…</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-// ── PRODUCT COUNT ──────────────────────────────────────────
-function updateProdCount() {
-  const lines = document.getElementById('products-input').value
-    .split('\n').map(l => l.trim()).filter(Boolean);
-  document.getElementById('prod-count').textContent = `${lines.length} products`;
-}
-updateProdCount();
+// ══ STATE ══════════════════════════════════════════════════════════
+let appData     = null;   // { products, slots, today, month }
+let rvData      = null;   // receiver API response
+let rvSlot      = 'All';
+let orderSubmitting = false;
 
-// ── SLOT TOGGLE ───────────────────────────────────────────
-function toggleSlot(el) {
-  el.classList.toggle('on');
-}
-function getSelectedSlots() {
-  return [...document.querySelectorAll('.slot-chip.on')].map(el => el.dataset.slot);
-}
-
-// ── TOAST ─────────────────────────────────────────────────
+// ══ UTILS ══════════════════════════════════════════════════════════
 function toast(msg, type='ok') {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = type === 'err' ? 'err' : '';
+  el.textContent = msg; el.className = type==='err'?'err':'';
   el.style.display = 'block';
   clearTimeout(window._tt);
-  window._tt = setTimeout(() => el.style.display = 'none', 3500);
+  window._tt = setTimeout(()=>el.style.display='none', 3200);
+}
+function slugify(s){ return s.replace(/[^a-zA-Z0-9]/g,'_') }
+async function api(url, method='GET', body=null) {
+  const opts = { method, headers:{} };
+  if(body){ opts.headers['Content-Type']='application/json'; opts.body=JSON.stringify(body); }
+  const r = await fetch(url, opts);
+  const d = await r.json();
+  if(d.error) throw new Error(d.error);
+  return d;
+}
+function fmtDate(iso) {
+  const d = new Date(iso+'T00:00:00');
+  return d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 }
 
-// ── HEALTH CHECK ──────────────────────────────────────────
+// ══ NAV ════════════════════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  const labels = {order:'Add Order', receiver:'Receiver View'};
+  document.getElementById('tb-title').textContent = labels[name]||name;
+  if(name==='receiver') loadReceiverView();
+}
+
+// ══ HEALTH ═════════════════════════════════════════════════════════
 async function checkHealth() {
-  const dot   = document.getElementById('conn-dot');
-  const title = document.getElementById('conn-title');
-  const sub   = document.getElementById('conn-sub');
-
-  dot.className   = 'conn-dot checking';
-  title.textContent = 'Checking…';
-  sub.textContent   = '';
-
+  const dot=document.getElementById('conn-dot'), title=document.getElementById('conn-title'), sub=document.getElementById('conn-sub');
   try {
-    const r  = await fetch('/api/health');
-    const d  = await r.json();
-
-    if (d.ok) {
-      dot.className     = 'conn-dot ok';
-      title.textContent = d.sheet_name || 'Connected';
-      sub.textContent   = `${(d.tabs||[]).length} tab(s): ${(d.tabs||[]).join(', ')}`;
-      document.getElementById('tb-sub').textContent = `Connected to: ${d.sheet_name}`;
-    } else {
-      dot.className     = 'conn-dot err';
-      title.textContent = 'Connection failed';
-      sub.textContent   = d.error || 'Unknown error';
-    }
+    const d = await api('/api/health');
+    dot.className = 'conn-dot ok';
+    title.textContent = d.sheet_name||'Connected';
+    sub.textContent = (d.tabs||[]).length+' tabs';
   } catch(e) {
-    dot.className     = 'conn-dot err';
-    title.textContent = 'Server error';
-    sub.textContent   = e.message;
+    dot.className = 'conn-dot err';
+    title.textContent = 'Not connected';
+    sub.textContent = e.message.slice(0,40);
   }
 }
 
-// ── SETUP ─────────────────────────────────────────────────
-async function runSetup() {
-  const products = document.getElementById('products-input').value
-    .split('\n').map(l => l.trim()).filter(Boolean);
-
-  if (!products.length) {
-    toast('Add at least one product', 'err');
-    return;
-  }
-
-  const slots = getSelectedSlots();
-  if (!slots.length) {
-    toast('Select at least one slot', 'err');
-    return;
-  }
-
-  const btn = document.getElementById('setup-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> Setting up…';
-
-  showLoading();
-
+// ══ INIT DATA ══════════════════════════════════════════════════════
+async function loadInitData() {
   try {
-    const r = await fetch('/api/setup', {
-      method:  'POST',
-      headers: {'Content-Type':'application/json'},
-      body:    JSON.stringify({ products, slots })
-    });
-    const d = await r.json();
-
-    if (d.error) throw new Error(d.error);
-
-    showSuccess(d);
-    checkHealth();
-    toast('Database setup complete ✓');
+    appData = await api('/api/init-data');
+    renderOrderForm();
+    const d = new Date(); 
+    document.getElementById('tb-date').textContent = fmtDate(appData.today);
   } catch(e) {
-    showError(e.message);
-    toast('Setup failed: ' + e.message, 'err');
+    document.getElementById('order-content').innerHTML = `
+      <div class="empty"><div class="ei">⚠️</div><h3>Not set up yet</h3>
+      <p>Open DB Setup in the sidebar,<br>add your products and click ⚡ Run Setup.</p></div>`;
   }
-
-  btn.disabled = false;
-  btn.innerHTML = '⚡ Setup Database';
 }
 
-// ── RESULT SCREENS ────────────────────────────────────────
-function showLoading() {
-  document.getElementById('main-content').innerHTML = `
-    <div style="text-align:center;padding:80px 20px;color:var(--muted)">
-      <div style="font-size:40px;margin-bottom:16px">⚙️</div>
-      <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px">Setting up Google Sheets…</div>
-      <div style="font-size:13px">Creating Product_Master, Slot_Master, Sales_Log and Inventory sheet</div>
-      <div style="margin-top:24px;display:flex;justify-content:center">
-        <div style="width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite"></div>
-      </div>
-    </div>`;
-}
+// ══ ORDER FORM ═════════════════════════════════════════════════════
+function renderOrderForm() {
+  if(!appData) return;
+  const { products, slots, today } = appData;
 
-function showSuccess(d) {
-  const tabIcons = {
-    'Product_Master': '🏷️',
-    'Slot_Master':    '🕐',
-    'Sales_Log':      '💰',
-  };
-  const tabDescs = {
-    'Product_Master': `${d.product_count} products loaded`,
-    'Slot_Master':    'Delivery slots configured',
-    'Sales_Log':      'Ready for sales entries',
-  };
+  const slotPills = slots.map(s =>
+    `<div class="slot-pill" onclick="selectSlot(this,'${s}')">${s}</div>`
+  ).join('');
 
-  const tabsHtml = (d.tabs_created || []).map(t => {
-    const isInv = t.startsWith('Inventory_');
-    return `<div class="tab-row done">
-      <span class="ti">${isInv ? '📋' : (tabIcons[t] || '📄')}</span>
-      <span class="tn">${t}</span>
-      <span class="td">${isInv ? `Active month: ${d.month}` : (tabDescs[t] || 'Created')}</span>
+  const qtyRows = products.map(p => {
+    const id = 'q_'+slugify(p);
+    return `<div class="qty-row">
+      <div class="qty-name">${p}</div>
+      <input type="number" class="qty-input" id="${id}" min="0" placeholder="0"
+        oninput="this.classList.toggle('has',!!this.value&&this.value!='0')">
     </div>`;
   }).join('');
 
-  document.getElementById('main-content').innerHTML = `
-    <div class="result-card success">
-      <div class="result-icon">✅</div>
-      <div class="result-title">Database Setup Complete!</div>
-      <div class="result-sub">
-        ${d.product_count} products · ${d.month} inventory sheet · All tabs created in Google Sheets
+  document.getElementById('order-content').innerHTML = `
+    <div class="card" style="max-width:780px">
+      <div class="card-title">📦 Add New Order</div>
+      <div class="card-sub">Order will be saved to Inventory_${appData.month} sheet as Pending</div>
+
+      <div class="form-row col3">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" class="input" id="o-date" value="${today}">
+        </div>
+        <div class="form-group">
+          <label>Account Name</label>
+          <input type="text" class="input" id="o-account" placeholder="e.g. Gourab, Amazon-Gourab">
+        </div>
+        <div class="form-group">
+          <label>Order Name <span style="color:var(--dim)">(optional)</span></label>
+          <input type="text" class="input" id="o-order-name" placeholder="e.g. Monthly stock">
+        </div>
       </div>
-      <div class="tabs-list">${tabsHtml}</div>
-      <div class="next-steps">
-        <b>What was created:</b><br>
-        📋 <b>Product_Master</b> — your full product list (editable anytime)<br>
-        🕐 <b>Slot_Master</b> — delivery time slots<br>
-        💰 <b>Sales_Log</b> — monthly sales records<br>
-        📦 <b>Inventory_${d.month}</b> — order tracking with columns: Date, Slot, Account, Order Name, Status + all products<br><br>
-        <b>To add/remove products later:</b> Edit the product list in the sidebar and click Setup again — it will update the Product_Master sheet without losing your inventory data.
+
+      <div class="form-group">
+        <label>Time Slot</label>
+        <div class="slot-pills" id="slot-pills">${slotPills}</div>
+        <input type="hidden" id="o-slot" value="">
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <label style="margin:0;font-size:13px;font-weight:600;color:var(--text)">Product Quantities</label>
+          <div class="qty-count" id="qty-count">0 items entered</div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="clearQtys()">Clear all</button>
+      </div>
+      <div class="qty-wrap" id="qty-wrap" oninput="updateQtyCount()">${qtyRows}</div>
+
+      <div style="margin-top:18px;display:flex;gap:10px;align-items:center">
+        <button class="btn btn-primary" id="order-submit-btn" onclick="submitOrder()" style="min-width:160px">
+          📦 Submit Order
+        </button>
+        <button class="btn btn-outline" onclick="resetOrderForm()">Reset</button>
+        <span id="order-msg" style="font-size:12px;color:var(--green)"></span>
       </div>
     </div>`;
 }
 
-function showError(msg) {
-  document.getElementById('main-content').innerHTML = `
-    <div class="result-card error">
-      <div class="result-icon">❌</div>
-      <div class="result-title">Setup Failed</div>
-      <div class="result-sub" style="color:var(--red)">${msg}</div>
-      <div class="next-steps">
-        <b>Common fixes:</b><br>
-        1. Check that <code>GOOGLE_SHEET_ID</code> env var is set in Render<br>
-        2. Check that <code>GOOGLE_CREDENTIALS_JSON</code> env var is set<br>
-        3. Make sure the service account has <b>Editor</b> access to the sheet<br>
-        4. Click <b>↺ Check Connection</b> in the sidebar to diagnose
-      </div>
-    </div>`;
+function selectSlot(el, slot) {
+  document.querySelectorAll('.slot-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('o-slot').value = slot;
 }
 
-// ── INIT ──────────────────────────────────────────────────
-checkHealth();
+function updateQtyCount() {
+  const inputs = document.querySelectorAll('.qty-input');
+  const count  = [...inputs].filter(i=>parseInt(i.value)>0).length;
+  document.getElementById('qty-count').textContent = `${count} item${count!==1?'s':''} entered`;
+}
+
+function clearQtys() {
+  document.querySelectorAll('.qty-input').forEach(i=>{i.value='';i.classList.remove('has');});
+  updateQtyCount();
+}
+
+function resetOrderForm() {
+  clearQtys();
+  document.getElementById('o-account').value    = '';
+  document.getElementById('o-order-name').value = '';
+  document.getElementById('o-slot').value        = '';
+  document.querySelectorAll('.slot-pill').forEach(p=>p.classList.remove('active'));
+  document.getElementById('order-msg').textContent = '';
+}
+
+async function submitOrder() {
+  if(orderSubmitting) return;
+  const date       = document.getElementById('o-date').value;
+  const slot       = document.getElementById('o-slot').value;
+  const account    = document.getElementById('o-account').value.trim();
+  const order_name = document.getElementById('o-order-name').value.trim();
+
+  if(!date)    { toast('Select a date','err'); return; }
+  if(!slot)    { toast('Select a time slot','err'); return; }
+  if(!account) { toast('Enter account name','err'); return; }
+
+  // Collect quantities
+  const quantities = {};
+  (appData.products||[]).forEach(p => {
+    const id  = 'q_'+slugify(p);
+    const val = parseInt(document.getElementById(id)?.value||'0');
+    if(val>0) quantities[p] = val;
+  });
+  if(!Object.keys(quantities).length) { toast('Enter at least one quantity','err'); return; }
+
+  orderSubmitting = true;
+  const btn = document.getElementById('order-submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="color:#0d1117"></div> Saving…';
+
+  try {
+    await api('/api/add-order','POST',{ date, slot, account, order_name, quantities });
+    toast('Order saved ✓');
+    document.getElementById('order-msg').textContent = '✓ Order saved to sheet';
+    resetOrderForm();
+    // Reset date to today after reset
+    document.getElementById('o-date').value = appData.today;
+  } catch(e) {
+    toast('Error: '+e.message,'err');
+  }
+
+  orderSubmitting = false;
+  btn.disabled = false;
+  btn.innerHTML = '📦 Submit Order';
+}
+
+// ══ RECEIVER VIEW ══════════════════════════════════════════════════
+async function loadReceiverView() {
+  document.getElementById('receiver-content').innerHTML =
+    '<div class="loading"><div class="spinner" style="color:var(--green)"></div> Loading today\'s orders…</div>';
+  try {
+    rvData = await api('/api/receiver');
+    rvSlot = 'All';
+    renderReceiverPage();
+  } catch(e) {
+    document.getElementById('receiver-content').innerHTML =
+      `<div class="empty"><div class="ei">⚠️</div><h3>Error</h3><p>${e.message}</p></div>`;
+  }
+}
+
+function renderReceiverPage() {
+  if(!rvData) return;
+  const { products, slots, summary, orders, today } = rvData;
+  const el = document.getElementById('receiver-content');
+
+  const pendingCount   = orders.length;
+  const deliveredToday = 0; // we only fetch pending from API
+  const totalItems     = orders.reduce((s,o)=>s+Object.values(o.quantities).reduce((a,b)=>a+b,0),0);
+
+  // Slot filter pills
+  const filterPills = ['All',...slots].map(s =>
+    `<div class="slot-pill ${s===rvSlot?'active':''}" onclick="setRvSlot('${s}',this)">${s==='All'?'All Slots':s}</div>`
+  ).join('');
+
+  el.innerHTML = `
+    <div style="max-width:900px">
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-lbl">Date</div><div class="stat-val" style="font-size:14px;color:var(--blue)">${fmtDate(today)}</div></div>
+        <div class="stat-box"><div class="stat-lbl">Pending Orders</div><div class="stat-val" style="color:var(--yellow)">${pendingCount}</div></div>
+        <div class="stat-box"><div class="stat-lbl">Total Items</div><div class="stat-val" style="color:var(--green)">${totalItems}</div></div>
+      </div>
+
+      <!-- Slot filter -->
+      <div class="card" style="padding:16px 20px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px">Filter by Slot</div>
+        <div class="slot-pills" id="rv-filter-pills">${filterPills}</div>
+      </div>
+
+      <!-- Summary table -->
+      <div class="card" id="rv-summary-card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:14px">
+          📊 Total Expected Items
+          <span id="rv-summary-slot" style="font-size:12px;font-weight:400;color:var(--muted);margin-left:8px"></span>
+        </div>
+        <div id="rv-summary-table"></div>
+      </div>
+
+      <div style="height:1px;background:var(--border);margin-bottom:20px"></div>
+
+      <!-- Order breakdown -->
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px">📦 Individual Order Breakdown</div>
+      <div id="rv-orders"></div>
+    </div>`;
+
+  renderRvContent();
+}
+
+function setRvSlot(slot, btn) {
+  rvSlot = slot;
+  document.querySelectorAll('#rv-filter-pills .slot-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  renderRvContent();
+}
+
+function renderRvContent() {
+  if(!rvData) return;
+  const { products, summary, orders } = rvData;
+
+  // Filter orders
+  const filtered = rvSlot==='All' ? orders : orders.filter(o=>o.slot===rvSlot);
+
+  // Build totals for filtered
+  const totals = {};
+  filtered.forEach(o => {
+    products.forEach(p => { totals[p]=(totals[p]||0)+(o.quantities[p]||0); });
+  });
+  const activeProds = products.filter(p=>(totals[p]||0)>0);
+
+  // Summary table
+  const summarySlotEl = document.getElementById('rv-summary-slot');
+  if(summarySlotEl) summarySlotEl.textContent = rvSlot==='All' ? '(all slots)' : `— ${rvSlot}`;
+
+  const summaryEl = document.getElementById('rv-summary-table');
+  if(summaryEl) {
+    if(!activeProds.length) {
+      summaryEl.innerHTML = '<div style="padding:10px 0;font-size:13px;color:var(--muted)">No pending items for this filter.</div>';
+    } else {
+      summaryEl.innerHTML = `<div class="tbl-wrap"><table>
+        <thead><tr><th>Product Name</th><th>Total Qty</th></tr></thead>
+        <tbody>${activeProds.map(p=>`
+          <tr><td>${p}</td><td>${totals[p]}</td></tr>`).join('')}
+        </tbody></table></div>`;
+    }
+  }
+
+  // Orders
+  const ordersEl = document.getElementById('rv-orders');
+  if(ordersEl) {
+    if(!filtered.length) {
+      ordersEl.innerHTML = '<div class="empty" style="padding:30px 0"><div class="ei">🎉</div><h3>No pending orders</h3><p>All orders for this slot have been delivered.</p></div>';
+    } else {
+      ordersEl.innerHTML = filtered.map(order => {
+        const items = products.filter(p=>(order.quantities[p]||0)>0);
+        const label = order.order_name||order.account;
+        return `
+        <div class="order-row" id="ord-${order.row_index}">
+          <div class="order-hd" onclick="toggleOrder(${order.row_index})">
+            <span class="order-chevron">▶</span>
+            <span style="font-size:16px">📦</span>
+            <span class="order-label">${label} <span style="font-weight:400;color:var(--muted);font-size:12px">(${order.account})</span></span>
+            <span class="order-slot-badge">${order.slot}</span>
+            <span class="order-items-count">${items.length} item${items.length!==1?'s':''}</span>
+          </div>
+          <div class="order-body">
+            <div class="order-meta">
+              <span><b>Account:</b> ${order.account}</span>
+              <span><b>Date:</b> ${order.date}</span>
+              <span><b>Slot:</b> ${order.slot}</span>
+            </div>
+            <div class="order-items-grid">
+              ${items.map(p=>`
+                <div class="order-item">
+                  <span class="oi-name">${p}</span>
+                  <span class="oi-qty">${order.quantities[p]}</span>
+                </div>`).join('')}
+            </div>
+            <div class="order-actions">
+              <button class="btn-deliver" id="deliver-btn-${order.row_index}"
+                onclick="markDelivered(${order.row_index})">
+                ✓ Mark as Delivered
+              </button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
+function toggleOrder(idx) {
+  const row = document.getElementById('ord-'+idx);
+  row.classList.toggle('open');
+}
+
+async function markDelivered(rowIndex) {
+  const btn = document.getElementById('deliver-btn-'+rowIndex);
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  try {
+    await api('/api/mark-delivered','POST',{row_index:rowIndex});
+    // Replace the whole row with a delivered badge
+    const row = document.getElementById('ord-'+rowIndex);
+    const label = row.querySelector('.order-label').textContent;
+    const slot  = row.querySelector('.order-slot-badge').textContent;
+    row.innerHTML = `
+      <div class="order-hd" style="cursor:default">
+        <span style="font-size:16px">✅</span>
+        <span class="order-label">${label}</span>
+        <span class="order-slot-badge">${slot}</span>
+        <span class="delivered-badge">✓ Delivered</span>
+      </div>`;
+    toast('Marked as Delivered ✓');
+    // Update local data so totals recalculate
+    rvData.orders = rvData.orders.filter(o=>o.row_index!==rowIndex);
+    renderRvContent();
+    // Re-render the order row since renderRvContent overwrites rv-orders
+    // Put the delivered row back in
+    const newRow = document.createElement('div');
+    newRow.className = 'order-row';
+    newRow.style.borderColor = 'rgba(63,185,80,.3)';
+    newRow.style.background  = 'rgba(63,185,80,.04)';
+    newRow.innerHTML = `
+      <div class="order-hd" style="cursor:default">
+        <span style="font-size:16px">✅</span>
+        <span class="order-label" style="color:var(--muted)">${label}</span>
+        <span class="order-slot-badge">${slot}</span>
+        <span class="delivered-badge">✓ Delivered</span>
+      </div>`;
+    document.getElementById('rv-orders').prepend(newRow);
+  } catch(e) {
+    toast('Error: '+e.message,'err');
+    btn.textContent = '✓ Mark as Delivered'; btn.disabled = false;
+  }
+}
+
+// ══ DB SETUP ═══════════════════════════════════════════════════════
+function toggleSetup() {
+  const drawer = document.getElementById('setup-drawer');
+  const arrow  = document.getElementById('setup-arrow');
+  drawer.classList.toggle('open');
+  arrow.textContent = drawer.classList.contains('open') ? '▼' : '▶';
+}
+
+function updateProdCount() {
+  const n = document.getElementById('products-input').value
+    .split('\n').map(l=>l.trim()).filter(Boolean).length;
+  document.getElementById('prod-count').textContent = n+' products';
+}
+updateProdCount();
+
+async function runSetup() {
+  const products = document.getElementById('products-input').value
+    .split('\n').map(l=>l.trim()).filter(Boolean);
+  const slots = [...document.querySelectorAll('.slot-chip.on')].map(el=>el.dataset.s);
+  if(!products.length){ toast('Add products first','err'); return; }
+  if(!slots.length)   { toast('Select at least one slot','err'); return; }
+
+  const btn = document.getElementById('setup-btn');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner" style="color:var(--yellow)"></div> Running…';
+  const resEl = document.getElementById('setup-result');
+  resEl.textContent = '';
+
+  try {
+    const d = await api('/api/setup','POST',{products, slots});
+    resEl.innerHTML = `<span style="color:var(--green)">✓ Done! ${d.product_count} products, ${d.inv_sheet} created.</span>`;
+    toast('DB setup complete ✓');
+    // Reload app data so order form refreshes
+    await loadInitData();
+    checkHealth();
+  } catch(e) {
+    resEl.innerHTML = `<span style="color:var(--red)">✗ ${e.message}</span>`;
+    toast('Setup failed','err');
+  }
+  btn.disabled = false; btn.innerHTML = '⚡ Run Setup';
+}
+
+// ══ BOOT ═══════════════════════════════════════════════════════════
+async function boot() {
+  // Set today date in topbar
+  const now = new Date();
+  document.getElementById('tb-date').textContent =
+    now.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  await Promise.all([checkHealth(), loadInitData()]);
+}
+
+boot();
 </script>
 </body>
 </html>
