@@ -297,60 +297,117 @@ def delete_order_row(month_key, row_index):
 
 # ── /api/receiver/<month_key>  (slot summary + pending orders) ────────────────
 
+@app.route("/api/debug/<month_key>", methods=["GET"])
+def debug_sheet(month_key):
+    """Shows raw sheet data for debugging."""
+    try:
+        sh   = get_sheet()
+        ws   = sh.worksheet(inv_title(month_key))
+        data = ws.get_all_values()
+        headers = data[0] if data else []
+        return jsonify({
+            "headers": headers,
+            "header_count": len(headers),
+            "row_count": len(data),
+            "first_3_rows": data[1:4] if len(data) > 1 else [],
+            "products_detected": headers[5:] if len(headers) > 5 else [],
+            "fixed_cols_used": 5
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/receiver/<month_key>", methods=["GET"])
 def receiver_view(month_key):
-    """Returns pending orders grouped by slot plus per-slot product totals."""
+    """Returns ALL orders (pending + delivered) with slot summary."""
     try:
         sh   = get_sheet()
         ws   = sh.worksheet(inv_title(month_key))
         data = ws.get_all_values()
         if not data:
-            return jsonify({"slots": {}, "orders": [], "products": []})
+            return jsonify({"products": [], "all_orders": [], "pending_orders": [], "slot_totals": {}})
 
-        headers  = data[0]
-        products = headers[len(FIXED_COLS):]
+        headers = data[0]
 
+        # Dynamically find column indices from actual header row
+        def col_idx(name):
+            """Find 0-based index of a column by name (case-insensitive)."""
+            for i, h in enumerate(headers):
+                if h.strip().lower() == name.lower():
+                    return i
+            return None
+
+        date_col   = col_idx("Date")   if col_idx("Date")   is not None else 0
+        slot_col   = col_idx("Slot")   if col_idx("Slot")   is not None else 1
+        acct_col   = col_idx("Account") if col_idx("Account") is not None else 2
+        oname_col  = col_idx("Order Name") if col_idx("Order Name") is not None else 3
+        status_col = col_idx("Status") if col_idx("Status") is not None else 4
+
+        # Products start after Status column (whichever is last of fixed cols)
+        prod_start = max(date_col, slot_col, acct_col, oname_col, status_col) + 1
+        products   = [h.strip() for h in headers[prod_start:] if h.strip()]
+
+        all_orders    = []
         pending_orders = []
-        slot_totals    = {}   # { slot: { product: total } }
+        # Overall totals (all pending)
+        overall_totals = {p: 0 for p in products}
+        # Slot totals (pending only)
+        slot_totals    = {}
 
         for i, row in enumerate(data[1:], start=2):
             if not any(c.strip() for c in row):
                 continue
             padded = row + [""] * max(0, len(headers) - len(row))
-            status = padded[4].strip() if len(padded) > 4 else ""
-            if status.lower() != "pending":
+
+            acct = padded[acct_col].strip() if acct_col < len(padded) else ""
+            # Skip structural rows
+            if acct.lower() in ("old stock", "current stock", ""):
                 continue
 
-            slot       = padded[1].strip()
-            account    = padded[2].strip()
-            order_name = padded[3].strip()
-            qtys       = {}
+            date       = padded[date_col].strip()   if date_col < len(padded)  else ""
+            slot       = padded[slot_col].strip()   if slot_col < len(padded)  else ""
+            order_name = padded[oname_col].strip()  if oname_col < len(padded) else ""
+            status     = padded[status_col].strip() if status_col < len(padded) else "Pending"
+
+            qtys = {}
             for j, p in enumerate(products):
-                col = len(FIXED_COLS) + j
-                val = padded[col] if col < len(padded) else ""
+                col = prod_start + j
+                val = padded[col].strip() if col < len(padded) else ""
                 try:
-                    qtys[p] = int(val) if val else 0
+                    qtys[p] = int(float(val)) if val else 0
                 except:
                     qtys[p] = 0
 
-            pending_orders.append({
+            order = {
                 "row_index":  i,
+                "date":       date,
                 "slot":       slot,
-                "account":    account,
+                "account":    acct,
                 "order_name": order_name,
+                "status":     status,
                 "quantities": qtys
-            })
+            }
+            all_orders.append(order)
 
-            # Accumulate slot totals
-            if slot not in slot_totals:
-                slot_totals[slot] = {p: 0 for p in products}
-            for p, q in qtys.items():
-                slot_totals[slot][p] = slot_totals[slot].get(p, 0) + q
+            if status.lower() == "pending":
+                pending_orders.append(order)
+                # Slot totals
+                if slot not in slot_totals:
+                    slot_totals[slot] = {p: 0 for p in products}
+                for p, q in qtys.items():
+                    slot_totals[slot][p] = slot_totals[slot].get(p, 0) + q
+                # Overall totals
+                for p, q in qtys.items():
+                    overall_totals[p] = overall_totals.get(p, 0) + q
 
         return jsonify({
-            "products":      products,
+            "products":       products,
+            "all_orders":     all_orders,
             "pending_orders": pending_orders,
-            "slot_totals":   slot_totals
+            "slot_totals":    slot_totals,
+            "overall_totals": overall_totals,
+            "pending_count":  len(pending_orders),
+            "total_count":    len(all_orders)
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
