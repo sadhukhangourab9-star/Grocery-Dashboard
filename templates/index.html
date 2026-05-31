@@ -7,188 +7,175 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:#0d1117; --sf:#161b22; --s2:#1c2230; --s3:#222b3a;
-      --bd:#2a3548; --green:#3fb950; --gdim:#173d20; --gbr:#56d364;
-      --yellow:#d29922; --ybg:#2e2108; --red:#f85149; --rbg:#2d1214;
-      --blue:#58a6ff; --bbg:#0c1f3b; --purple:#bc8cff; --pbg:#1a0f2e;
-      --text:#e6edf3; --mut:#7d8590; --dim:#484f58;
-      --mono:'Space Mono',monospace; --body:'DM Sans',sans-serif;
-      --r:8px; --rs:5px;
+      --bg:#0d1117;--sf:#161b22;--s2:#1c2230;--s3:#222b3a;
+      --bd:#2a3548;--green:#3fb950;--gdim:#173d20;--gbr:#56d364;
+      --yellow:#d29922;--ybg:#2e2108;--red:#f85149;--rbg:#2d1214;
+      --blue:#58a6ff;--bbg:#0c1f3b;--purple:#bc8cff;--pbg:#1a0f2e;
+      --text:#e6edf3;--mut:#7d8590;--dim:#484f58;
+      --mono:'Space Mono',monospace;--body:'DM Sans',sans-serif;--r:8px;--rs:5px;
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;display:flex;font-size:14px}
 
     /* ══ SIDEBAR ══ */
-    .sidebar{width:240px;flex-shrink:0;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;height:100vh;overflow-y:auto;position:sticky;top:0}
-    .brand{padding:18px 16px 14px;border-bottom:1px solid var(--bd)}
+    .sidebar{width:230px;flex-shrink:0;background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;height:100vh;overflow-y:auto;position:sticky;top:0}
+    .brand{padding:16px 14px 12px;border-bottom:1px solid var(--bd)}
     .brand h1{font-family:var(--mono);font-size:11px;color:var(--green);letter-spacing:.12em;text-transform:uppercase}
     .brand p{font-size:10px;color:var(--mut);margin-top:3px;font-family:var(--mono)}
-
-    .conn-bar{margin:10px;padding:8px 11px;border-radius:var(--rs);border:1px solid var(--bd);background:var(--s2);display:flex;align-items:center;gap:7px}
+    .conn-bar{margin:10px;padding:8px 10px;border-radius:var(--rs);border:1px solid var(--bd);background:var(--s2);display:flex;align-items:center;gap:7px}
     .cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-    .cdot.ok{background:var(--green);animation:p 2s infinite}
+    .cdot.ok{background:var(--green);animation:pu 2s infinite}
     .cdot.err{background:var(--red)}
-    .cdot.spin{background:var(--yellow);animation:p .8s infinite}
-    @keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
-    .cinfo b{color:var(--text);display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+    .cdot.sp{background:var(--yellow);animation:pu .8s infinite}
+    @keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
+    .cinfo b{color:var(--text);display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:155px}
     .cinfo span{color:var(--mut);font-size:10px}
-
-    .nav-lbl{padding:12px 14px 4px;font-size:9.5px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;font-family:var(--mono)}
-    .nav-item{display:flex;align-items:center;gap:9px;padding:8px 14px;font-size:13px;color:var(--mut);cursor:pointer;transition:all .12s;border-left:2px solid transparent;user-select:none}
-    .nav-item:hover{color:var(--text);background:var(--s2)}
-    .nav-item.active{color:var(--green);border-left-color:var(--green);background:rgba(63,185,80,.07);font-weight:600}
-    .nav-item .ni{width:16px;text-align:center;font-size:13px;flex-shrink:0}
-
-    /* Month chips in sidebar */
-    .month-chips{padding:4px 10px 8px}
-    .mchip{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:var(--rs);cursor:pointer;font-size:12px;color:var(--mut);transition:all .12s;margin-bottom:2px;user-select:none}
-    .mchip:hover{background:var(--s2);color:var(--text)}
-    .mchip.active{background:var(--gdim);color:var(--green);font-weight:700}
-    .mchip .mdot{width:6px;height:6px;border-radius:50%;background:var(--green);display:none;flex-shrink:0}
-    .mchip.active .mdot{display:block}
-    .mchip-loading{padding:8px 10px;font-size:11px;color:var(--dim);display:flex;align-items:center;gap:7px}
-
-    /* DB Setup at bottom */
-    .setup-section{padding:10px;border-top:1px solid var(--bd);margin-top:auto}
-    .setup-toggle{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--rs);cursor:pointer;font-size:12px;color:var(--mut);border:1px solid var(--bd);background:var(--s2);transition:all .12s}
-    .setup-toggle:hover{border-color:var(--yellow);color:var(--yellow)}
-    .setup-drawer{display:none;margin-top:10px}
-    .setup-drawer.open{display:block}
+    .nlbl{padding:10px 14px 3px;font-size:9.5px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;font-family:var(--mono)}
+    .ni{display:flex;align-items:center;gap:9px;padding:8px 14px;font-size:13px;color:var(--mut);cursor:pointer;transition:all .12s;border-left:2px solid transparent;user-select:none}
+    .ni:hover{color:var(--text);background:var(--s2)}
+    .ni.on{color:var(--green);border-left-color:var(--green);background:rgba(63,185,80,.07);font-weight:600}
+    .ni .ic{width:16px;text-align:center;font-size:13px;flex-shrink:0}
+    .setup-sec{padding:10px;border-top:1px solid var(--bd);margin-top:auto}
+    .setup-tog{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--rs);cursor:pointer;font-size:12px;color:var(--mut);border:1px solid var(--bd);background:var(--s2);transition:all .12s}
+    .setup-tog:hover{border-color:var(--yellow);color:var(--yellow)}
+    .setup-dr{display:none;margin-top:10px}
+    .setup-dr.open{display:block}
 
     /* ══ MAIN ══ */
     .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:100vh}
-    .topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-    .tb-left{display:flex;align-items:center;gap:10px}
+    .topbar{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 22px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .tb-l{display:flex;align-items:center;gap:10px}
     .tb-title{font-size:14px;font-weight:700}
     .tb-badge{font-size:10px;font-family:var(--mono);background:var(--gdim);color:var(--green);padding:2px 8px;border-radius:10px;border:1px solid rgba(63,185,80,.25)}
     .tb-date{font-size:11.5px;color:var(--mut);font-family:var(--mono)}
-    .content{flex:1;overflow-y:auto;padding:24px}
+    .content{flex:1;overflow-y:auto;padding:22px}
+    .page{display:none}.page.active{display:block;animation:fi .15s ease}
+    @keyframes fi{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 
-    /* Pages */
-    .page{display:none}.page.active{display:block}
-    @keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-    .page.active{animation:fi .15s ease}
-
-    /* ══ SHARED COMPONENTS ══ */
+    /* ══ SHARED ══ */
     .card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:20px;margin-bottom:18px}
     label{font-size:11.5px;color:var(--mut);display:block;margin-bottom:5px;font-weight:500}
-    .input,.select,.textarea{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--text);font-family:var(--body);font-size:13px;padding:8px 11px;outline:none;transition:border .12s;width:100%}
-    .input:focus,.select:focus,.textarea:focus{border-color:var(--green)}
-    .select option{background:var(--s2)}
-    .textarea{resize:vertical;min-height:160px;font-size:11.5px;line-height:1.6}
-    .form-group{margin-bottom:14px}
-    .form-row{display:grid;gap:14px}
-    .col2{grid-template-columns:1fr 1fr}.col3{grid-template-columns:1fr 1fr 1fr}
-    .divider{height:1px;background:var(--bd);margin:16px 0}
-    .hint{font-size:10px;color:var(--dim);margin-top:4px;line-height:1.5}
-
+    .inp,.sel,.ta{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--text);font-family:var(--body);font-size:13px;padding:8px 11px;outline:none;transition:border .12s;width:100%}
+    .inp:focus,.sel:focus,.ta:focus{border-color:var(--green)}
+    .sel option{background:var(--s2)}
+    .ta{resize:vertical;min-height:150px;font-size:11.5px;line-height:1.6}
+    .fg{margin-bottom:14px}
+    .fr{display:grid;gap:14px}
+    .c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:1fr 1fr 1fr}
+    .div{height:1px;background:var(--bd);margin:16px 0}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:var(--rs);font-size:13px;font-family:var(--body);font-weight:600;cursor:pointer;border:none;transition:all .12s;white-space:nowrap}
-    .btn-p{background:var(--green);color:#0d1117}.btn-p:hover{background:var(--gbr)}
-    .btn-o{background:transparent;color:var(--mut);border:1px solid var(--bd)}.btn-o:hover{border-color:var(--green);color:var(--green)}
-    .btn-y{background:rgba(210,153,34,.12);color:var(--yellow);border:1px solid rgba(210,153,34,.25)}.btn-y:hover{background:rgba(210,153,34,.22)}
-    .btn-full{width:100%}.btn-sm{padding:5px 11px;font-size:12px}
+    .bp{background:var(--green);color:#0d1117}.bp:hover{background:var(--gbr)}
+    .bo{background:transparent;color:var(--mut);border:1px solid var(--bd)}.bo:hover{border-color:var(--green);color:var(--green)}
+    .by{background:rgba(210,153,34,.12);color:var(--yellow);border:1px solid rgba(210,153,34,.25)}.by:hover{background:rgba(210,153,34,.22)}
+    .br{background:rgba(248,81,73,.12);color:var(--red);border:1px solid rgba(248,81,73,.25)}.br:hover{background:rgba(248,81,73,.22)}
+    .bpurp{background:rgba(188,140,255,.12);color:var(--purple);border:1px solid rgba(188,140,255,.25)}.bpurp:hover{background:rgba(188,140,255,.22)}
+    .bfull{width:100%}.bsm{padding:5px 11px;font-size:12px}
     .btn:disabled{opacity:.4;cursor:not-allowed}
+    .spn{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.15);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .ld{display:flex;align-items:center;gap:9px;padding:20px;color:var(--mut);font-size:13px}
+    .empty{text-align:center;padding:50px 20px;color:var(--mut)}
+    .empty .ei{font-size:40px;margin-bottom:12px}
+    .empty h3{font-size:15px;font-weight:600;color:var(--text);margin-bottom:7px}
+    .empty p{font-size:13px;line-height:1.7}
 
     /* Slot pills */
-    .slot-pills{display:flex;flex-wrap:wrap;gap:7px}
-    .slot-pill{padding:7px 15px;border-radius:20px;font-size:12px;border:1px solid var(--bd);background:var(--s2);color:var(--mut);cursor:pointer;font-family:var(--mono);transition:all .12s;user-select:none}
-    .slot-pill:hover{border-color:var(--green);color:var(--green)}
-    .slot-pill.active{border-color:var(--green);color:var(--green);background:var(--gdim);font-weight:700}
-
-    .slot-chip{padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid var(--bd);background:var(--s3);color:var(--mut);cursor:pointer;font-family:var(--mono);transition:all .12s;user-select:none}
-    .slot-chip.on{border-color:var(--green);color:var(--green);background:var(--gdim)}
+    .spills{display:flex;flex-wrap:wrap;gap:7px}
+    .spill{padding:7px 15px;border-radius:20px;font-size:12px;border:1px solid var(--bd);background:var(--s2);color:var(--mut);cursor:pointer;font-family:var(--mono);transition:all .12s;user-select:none}
+    .spill:hover{border-color:var(--green);color:var(--green)}
+    .spill.on{border-color:var(--green);color:var(--green);background:var(--gdim);font-weight:700}
+    .schip{padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid var(--bd);background:var(--s3);color:var(--mut);cursor:pointer;font-family:var(--mono);transition:all .12s;user-select:none}
+    .schip.on{border-color:var(--green);color:var(--green);background:var(--gdim)}
 
     /* Qty list */
-    .qty-wrap{border:1px solid var(--bd);border-radius:var(--rs);overflow:hidden;max-height:440px;overflow-y:auto}
-    .qty-row{display:grid;grid-template-columns:1fr 86px;align-items:center;padding:7px 13px;border-bottom:1px solid rgba(42,53,72,.4)}
-    .qty-row:last-child{border-bottom:none}
-    .qty-row:nth-child(even){background:rgba(28,34,48,.4)}
-    .qty-name{font-size:12.5px}
-    .qty-input{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--text);font-size:13px;padding:5px 8px;text-align:center;outline:none;font-family:var(--mono);width:100%;transition:border .12s}
-    .qty-input:focus{border-color:var(--green)}
-    .qty-input.has{border-color:var(--green);color:var(--gbr)}
+    .qwrap{border:1px solid var(--bd);border-radius:var(--rs);overflow:hidden;max-height:420px;overflow-y:auto}
+    .qrow{display:grid;grid-template-columns:1fr 84px;align-items:center;padding:7px 13px;border-bottom:1px solid rgba(42,53,72,.4)}
+    .qrow:last-child{border-bottom:none}
+    .qrow:nth-child(even){background:rgba(28,34,48,.4)}
+    .qinp{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--text);font-size:13px;padding:5px 8px;text-align:center;outline:none;font-family:var(--mono);width:100%;transition:border .12s}
+    .qinp:focus{border-color:var(--green)}
+    .qinp.has{border-color:var(--green);color:var(--gbr)}
 
     /* Receiver */
-    .order-row{border:1px solid var(--bd);border-radius:var(--rs);margin-bottom:8px;overflow:hidden;background:var(--sf)}
-    .order-hd{display:flex;align-items:center;gap:10px;padding:11px 15px;cursor:pointer;transition:background .12s;user-select:none}
-    .order-hd:hover{background:var(--s2)}
-    .ochev{color:var(--mut);font-size:11px;width:13px;flex-shrink:0;transition:transform .15s}
-    .order-row.open .ochev{transform:rotate(90deg)}
-    .olabel{flex:1;font-size:13px;font-weight:500}
-    .oslot-badge{font-family:var(--mono);font-size:10.5px;background:var(--bbg);color:var(--blue);border:1px solid rgba(88,166,255,.2);padding:2px 8px;border-radius:20px;flex-shrink:0}
-    .ocount{font-size:10.5px;color:var(--mut);font-family:var(--mono);background:var(--s2);border:1px solid var(--bd);padding:2px 7px;border-radius:10px;flex-shrink:0}
-    .order-body{display:none;padding:13px 15px 15px;border-top:1px solid var(--bd);background:var(--s2)}
-    .order-row.open .order-body{display:block}
+    .orow{border:1px solid var(--bd);border-radius:var(--rs);margin-bottom:8px;overflow:hidden;background:var(--sf)}
+    .ohd{display:flex;align-items:center;gap:10px;padding:11px 15px;cursor:pointer;transition:background .12s;user-select:none}
+    .ohd:hover{background:var(--s2)}
+    .ochv{color:var(--mut);font-size:11px;width:13px;flex-shrink:0;transition:transform .15s}
+    .orow.open .ochv{transform:rotate(90deg)}
+    .olbl{flex:1;font-size:13px;font-weight:500}
+    .oslot{font-family:var(--mono);font-size:10.5px;background:var(--bbg);color:var(--blue);border:1px solid rgba(88,166,255,.2);padding:2px 8px;border-radius:20px;flex-shrink:0}
+    .ocnt{font-size:10.5px;color:var(--mut);font-family:var(--mono);background:var(--s2);border:1px solid var(--bd);padding:2px 7px;border-radius:10px;flex-shrink:0}
+    .obody{display:none;padding:13px 15px 15px;border-top:1px solid var(--bd);background:var(--s2)}
+    .orow.open .obody{display:block}
     .ometa{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--mut);margin-bottom:11px}
     .ometa b{color:var(--text)}
-    .items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px;margin-bottom:13px}
+    .igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:6px;margin-bottom:12px}
     .oitem{display:flex;align-items:center;justify-content:space-between;background:var(--sf);border:1px solid var(--bd);border-radius:var(--rs);padding:7px 11px}
-    .oi-n{font-size:12px;color:var(--mut);flex:1;padding-right:8px}
-    .oi-q{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--gbr);flex-shrink:0}
-    .btn-deliver{background:var(--gdim);color:var(--green);border:1px solid rgba(63,185,80,.3);padding:7px 15px;border-radius:var(--rs);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .12s;font-family:var(--body)}
-    .btn-deliver:hover{background:rgba(63,185,80,.2)}
+    .oin{font-size:12px;color:var(--mut);flex:1;padding-right:8px}
+    .oiq{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--gbr);flex-shrink:0}
+    .bdel{background:var(--gdim);color:var(--green);border:1px solid rgba(63,185,80,.3);padding:6px 14px;border-radius:var(--rs);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .12s;font-family:var(--body)}
+    .bdel:hover{background:rgba(63,185,80,.2)}
     .del-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(63,185,80,.1);color:var(--green);border:1px solid rgba(63,185,80,.2);padding:4px 11px;border-radius:var(--rs);font-size:12px}
 
-    /* ══ MONTH DASHBOARD ══ */
-    .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-    .stat-box{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px 18px}
-    .stat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-bottom:8px}
-    .stat-val{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1}
-    .stat-sub{font-size:10.5px;color:var(--mut);margin-top:5px}
-
-    /* Progress bar */
-    .prog-wrap{height:6px;background:var(--bd);border-radius:3px;overflow:hidden;margin-top:8px}
-    .prog-fill{height:100%;border-radius:3px;transition:width .4s ease}
-
-    /* Product delivered table */
-    .tbl-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:var(--rs)}
+    /* Table */
+    .twrap{overflow-x:auto;border:1px solid var(--bd);border-radius:var(--rs)}
     table{width:100%;border-collapse:collapse;font-size:12.5px}
     thead th{background:var(--s2);color:var(--mut);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;padding:9px 13px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap;position:sticky;top:0}
-    thead th.num{text-align:right}
+    thead th.r{text-align:right}
     tbody td{padding:8px 13px;border-bottom:1px solid rgba(42,53,72,.35);font-size:12.5px}
-    tbody td.num{text-align:right;font-family:var(--mono);font-weight:600}
+    tbody td.r{text-align:right;font-family:var(--mono);font-weight:600}
     tbody tr:last-child td{border-bottom:none}
     tbody tr:hover td{background:rgba(255,255,255,.02)}
 
-    /* Status badges */
-    .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600;font-family:var(--mono)}
-    .badge-g{background:rgba(63,185,80,.12);color:var(--green)}
-    .badge-y{background:rgba(210,153,34,.12);color:var(--yellow)}
-    .badge-r{background:rgba(248,81,73,.12);color:var(--red)}
+    /* Stats */
+    .sg4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+    .sg3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+    .sbox{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px 18px}
+    .slbl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-bottom:7px}
+    .sval{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1}
+    .ssub{font-size:10.5px;color:var(--mut);margin-top:5px}
+    .prog{height:5px;background:var(--bd);border-radius:3px;overflow:hidden;margin-top:8px}
+    .progf{height:100%;border-radius:3px;transition:width .5s}
 
-    /* Slot breakdown mini bars */
+    /* Month picker */
+    .month-picker{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+    .month-sel{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--text);font-family:var(--mono);font-size:13px;padding:7px 12px;outline:none;cursor:pointer;transition:border .12s}
+    .month-sel:focus{border-color:var(--green)}
+    .month-sel option{background:var(--s2)}
+
+    /* Sales manager table */
+    .smtbl thead th{background:var(--s3);padding:10px 14px}
+    .smtbl thead th.salesman{background:rgba(88,166,255,.08);color:var(--blue)}
+    .smtbl thead th.remain{background:rgba(188,140,255,.08);color:var(--purple)}
+    .smtbl tbody td.salesman{color:var(--blue)}
+    .smtbl tbody td.remain{color:var(--purple);font-weight:700}
+    .smtbl tbody td.total-del{color:var(--green)}
+    .smtbl .edit-cell{position:relative}
+    .cell-inp{background:transparent;border:none;border-bottom:1px solid var(--green);color:var(--blue);font-family:var(--mono);font-size:12.5px;width:60px;text-align:center;outline:none;padding:2px 4px}
+
+    /* Slot bar */
     .slot-bars{display:flex;flex-direction:column;gap:10px}
-    .slot-bar-row{display:grid;grid-template-columns:80px 1fr 40px;gap:10px;align-items:center}
-    .slot-bar-label{font-size:12px;color:var(--mut);font-family:var(--mono);white-space:nowrap}
-    .slot-bar-track{height:8px;background:var(--bd);border-radius:4px;overflow:hidden}
-    .slot-bar-fill{height:100%;background:var(--blue);border-radius:4px;transition:width .5s}
-    .slot-bar-count{font-size:12px;font-family:var(--mono);color:var(--text);text-align:right}
+    .sbar{display:grid;grid-template-columns:80px 1fr 36px;gap:10px;align-items:center}
+    .sbarlbl{font-size:12px;color:var(--mut);font-family:var(--mono)}
+    .sbartr{height:7px;background:var(--bd);border-radius:4px;overflow:hidden}
+    .sbarf{height:100%;background:var(--blue);border-radius:4px;transition:width .5s}
+    .sbarc{font-size:12px;font-family:var(--mono);color:var(--text);text-align:right}
 
-    /* Date activity dots */
-    .date-grid{display:flex;flex-wrap:wrap;gap:6px}
-    .date-cell{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:6px 10px;font-size:11px;font-family:var(--mono);color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:3px;min-width:58px;cursor:default}
-    .date-cell .dc-date{font-size:10px}
-    .date-cell .dc-count{font-size:15px;font-weight:700;color:var(--green)}
+    /* Date cells */
+    .dcells{display:flex;flex-wrap:wrap;gap:6px}
+    .dcell{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:6px 10px;font-size:11px;font-family:var(--mono);color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:3px;min-width:56px}
+    .dcell .dcd{font-size:10px}
+    .dcell .dcc{font-size:15px;font-weight:700;color:var(--green)}
 
-    /* Order history table inside month view */
-    .history-row td:first-child{font-family:var(--mono);font-size:11.5px}
+    /* Badge */
+    .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;font-family:var(--mono)}
+    .bg{background:rgba(63,185,80,.12);color:var(--green)}
+    .by2{background:rgba(210,153,34,.12);color:var(--yellow)}
+    .br2{background:rgba(248,81,73,.12);color:var(--red)}
 
-    /* Summary table in receiver */
-    .sum-tbl thead th:last-child{text-align:right}
-    .sum-tbl tbody td:last-child{text-align:right;font-family:var(--mono);font-weight:700;color:var(--green)}
-
-    /* Misc */
-    .empty{text-align:center;padding:52px 20px;color:var(--mut)}
-    .empty .ei{font-size:42px;margin-bottom:12px}
-    .empty h3{font-size:15px;font-weight:600;color:var(--text);margin-bottom:7px}
-    .empty p{font-size:13px;line-height:1.7}
-    .loading{display:flex;align-items:center;gap:9px;padding:20px;color:var(--mut);font-size:13px}
-    .sp{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.1);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
+    /* Toast */
     #toast{position:fixed;bottom:22px;right:22px;background:var(--s2);border:1px solid var(--green);color:var(--green);padding:10px 16px;border-radius:var(--r);font-size:13px;z-index:999;display:none;box-shadow:0 4px 20px rgba(0,0,0,.5)}
     #toast.err{border-color:var(--red);color:var(--red)}
-
     ::-webkit-scrollbar{width:4px;height:4px}
     ::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
   </style>
@@ -197,49 +184,32 @@
 
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
-  <div class="brand">
-    <h1>🛒 Grocery DB</h1>
-    <p>Stock Manager v4.1</p>
-  </div>
-
+  <div class="brand"><h1>🛒 Grocery DB</h1><p>Stock Manager v4.2</p></div>
   <div class="conn-bar">
-    <div class="cdot spin" id="cdot"></div>
-    <div class="cinfo">
-      <b id="ctitle">Checking…</b>
-      <span id="csub"></span>
-    </div>
+    <div class="cdot sp" id="cdot"></div>
+    <div class="cinfo"><b id="ctitle">Checking…</b><span id="csub"></span></div>
   </div>
-
   <nav>
-    <div class="nav-lbl">Orders</div>
-    <div class="nav-item active" id="nav-order" onclick="showPage('order')">
-      <span class="ni">➕</span> Add Order
-    </div>
-    <div class="nav-item" id="nav-receiver" onclick="showPage('receiver')">
-      <span class="ni">🚚</span> Receiver View
-    </div>
-
-    <div class="nav-lbl" style="margin-top:6px">Months</div>
-    <div class="month-chips" id="month-chips">
-      <div class="mchip-loading"><div class="sp"></div> Loading…</div>
-    </div>
+    <div class="nlbl">Orders</div>
+    <div class="ni on" id="nav-order" onclick="go('order')"><span class="ic">➕</span> Add Order</div>
+    <div class="ni" id="nav-receiver" onclick="go('receiver')"><span class="ic">🚚</span> Receiver View</div>
+    <div class="nlbl" style="margin-top:6px">Analytics</div>
+    <div class="ni" id="nav-monthly" onclick="go('monthly')"><span class="ic">📅</span> Monthly Dashboard</div>
+    <div class="ni" id="nav-sales" onclick="go('sales')"><span class="ic">💰</span> Sales Manager</div>
   </nav>
-
-  <!-- DB Setup -->
-  <div class="setup-section">
-    <div class="setup-toggle" onclick="toggleSetup()">
-      <span>🗄️</span>
-      <span style="flex:1;font-size:12px">DB Setup</span>
-      <span id="setup-arrow" style="font-size:10px">▶</span>
+  <div class="setup-sec">
+    <div class="setup-tog" onclick="toggleSetup()">
+      <span>🗄️</span><span style="flex:1;font-size:12px">DB Setup</span>
+      <span id="sarrow" style="font-size:10px">▶</span>
     </div>
-    <div class="setup-drawer" id="setup-drawer">
+    <div class="setup-dr" id="sdr">
       <div style="padding:8px 2px 0">
-        <div class="form-group">
+        <div class="fg">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
             <label style="margin:0">Products</label>
-            <span style="font-family:var(--mono);font-size:10px;color:var(--mut);background:var(--s3);border:1px solid var(--bd);padding:1px 7px;border-radius:8px" id="prod-count">0</span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--mut);background:var(--s3);border:1px solid var(--bd);padding:1px 7px;border-radius:8px" id="pcnt">0</span>
           </div>
-          <textarea class="textarea" id="products-input" oninput="updateProdCount()">Fortune Mustard pouch
+          <textarea class="ta" id="pinput" oninput="updPCnt()">Fortune Mustard pouch
 Fortune Mustard Bottle
 Fortune Soya pouch
 Fortune Ricebran
@@ -270,18 +240,18 @@ Tata Tea 100gm
 Dalda
 Ashirbad atta 5kg</textarea>
         </div>
-        <div class="form-group">
+        <div class="fg">
           <label>Slots</label>
-          <div style="display:flex;flex-wrap:wrap;gap:5px" id="setup-slots">
-            <div class="slot-chip on" data-s="10 PM" onclick="this.classList.toggle('on')">10 PM</div>
-            <div class="slot-chip on" data-s="12 PM" onclick="this.classList.toggle('on')">12 PM</div>
-            <div class="slot-chip on" data-s="8 AM"  onclick="this.classList.toggle('on')">8 AM</div>
-            <div class="slot-chip on" data-s="2 PM"  onclick="this.classList.toggle('on')">2 PM</div>
-            <div class="slot-chip on" data-s="4 PM"  onclick="this.classList.toggle('on')">4 PM</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px" id="sslots">
+            <div class="schip on" data-s="10 PM" onclick="this.classList.toggle('on')">10 PM</div>
+            <div class="schip on" data-s="12 PM" onclick="this.classList.toggle('on')">12 PM</div>
+            <div class="schip on" data-s="8 AM"  onclick="this.classList.toggle('on')">8 AM</div>
+            <div class="schip on" data-s="2 PM"  onclick="this.classList.toggle('on')">2 PM</div>
+            <div class="schip on" data-s="4 PM"  onclick="this.classList.toggle('on')">4 PM</div>
           </div>
         </div>
-        <button class="btn btn-y btn-full btn-sm" id="setup-btn" onclick="runSetup()">⚡ Run Setup</button>
-        <div id="setup-result" style="margin-top:7px;font-size:11px;line-height:1.5"></div>
+        <button class="btn by bfull bsm" id="setupbtn" onclick="runSetup()">⚡ Run Setup</button>
+        <div id="setupres" style="margin-top:7px;font-size:11px;line-height:1.5"></div>
       </div>
     </div>
   </div>
@@ -290,588 +260,588 @@ Ashirbad atta 5kg</textarea>
 <!-- ══ MAIN ══ -->
 <div class="main">
   <div class="topbar">
-    <div class="tb-left">
-      <div class="tb-title" id="tb-title">Add Order</div>
-      <div class="tb-badge" id="tb-badge" style="display:none"></div>
+    <div class="tb-l">
+      <div class="tb-title" id="tbtitle">Add Order</div>
+      <div class="tb-badge" id="tbbadge" style="display:none"></div>
     </div>
-    <div class="tb-date" id="tb-date"></div>
+    <div class="tb-date" id="tbdate"></div>
   </div>
   <div class="content">
 
-    <!-- ── ADD ORDER ── -->
+    <!-- ADD ORDER -->
     <div class="page active" id="page-order">
-      <div id="order-content">
-        <div class="loading"><div class="sp"></div> Loading products…</div>
-      </div>
+      <div id="order-content"><div class="ld"><div class="spn" style="color:var(--green)"></div> Loading…</div></div>
     </div>
 
-    <!-- ── RECEIVER VIEW ── -->
+    <!-- RECEIVER VIEW -->
     <div class="page" id="page-receiver">
-      <div id="receiver-content">
-        <div class="loading"><div class="sp"></div> Loading…</div>
-      </div>
+      <div id="rv-content"><div class="ld"><div class="spn" style="color:var(--green)"></div> Loading…</div></div>
     </div>
 
-    <!-- ── MONTH DASHBOARD ── -->
-    <div class="page" id="page-month">
-      <div id="month-content">
-        <div class="empty"><div class="ei">📅</div><h3>Select a month</h3><p>Click any month in the sidebar</p></div>
-      </div>
+    <!-- MONTHLY DASHBOARD -->
+    <div class="page" id="page-monthly">
+      <div id="monthly-content"><div class="empty"><div class="ei">📅</div><h3>Monthly Dashboard</h3><p>Loading…</p></div></div>
+    </div>
+
+    <!-- SALES MANAGER -->
+    <div class="page" id="page-sales">
+      <div id="sales-content"><div class="empty"><div class="ei">💰</div><h3>Sales Manager</h3><p>Loading…</p></div></div>
     </div>
 
   </div>
 </div>
-
 <div id="toast"></div>
 
 <script>
-// ══ STATE ══════════════════════════════════════════
-let appData   = null;
-let rvData    = null;
-let rvSlot    = 'All';
-let activeMonth = null;
-let monthCache  = {};
+// ══ STATE ══
+let appData=null, rvData=null, rvSlot='All', rvDate='';
+let monthlyData=null, salesData=null;
+let allMonths=[];
+let activeMonthlyKey='', activeSalesKey='';
 
-// ══ UTILS ══════════════════════════════════════════
-function toast(msg,type='ok'){
-  const el=document.getElementById('toast');
-  el.textContent=msg; el.className=type==='err'?'err':'';
-  el.style.display='block';
-  clearTimeout(window._tt);
+// ══ UTILS ══
+const $ = id => document.getElementById(id);
+function toast(msg,t='ok'){
+  const el=$('toast'); el.textContent=msg; el.className=t==='err'?'err':'';
+  el.style.display='block'; clearTimeout(window._tt);
   window._tt=setTimeout(()=>el.style.display='none',3000);
 }
-function slugify(s){return s.replace(/[^a-zA-Z0-9]/g,'_')}
+function slug(s){return s.replace(/[^a-zA-Z0-9]/g,'_')}
 async function api(url,method='GET',body=null){
-  const opts={method,headers:{}};
-  if(body){opts.headers['Content-Type']='application/json';opts.body=JSON.stringify(body);}
-  const r=await fetch(url,opts);
-  const d=await r.json();
+  const o={method,headers:{}};
+  if(body){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body);}
+  const r=await fetch(url,o), d=await r.json();
   if(d.error) throw new Error(d.error);
   return d;
 }
-function fmtDate(iso){
+function fmtD(iso){
   if(!iso) return '';
   const d=new Date(iso+'T00:00:00');
   return d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 }
-function fmtMonthKey(k){ return k.replace('_',' '); }
-
-// ══ NAV ════════════════════════════════════════════
-function showPage(name, monthKey){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.querySelectorAll('.mchip').forEach(c=>c.classList.remove('active'));
-
-  document.getElementById('page-'+name).classList.add('active');
-
-  const ni = document.getElementById('nav-'+name);
-  if(ni) ni.classList.add('active');
-
-  const labels={order:'Add Order',receiver:'Receiver View',month:'Month Dashboard'};
-  document.getElementById('tb-title').textContent = labels[name]||name;
-
-  const badge = document.getElementById('tb-badge');
-  if(name==='month' && monthKey){
-    badge.textContent = fmtMonthKey(monthKey);
-    badge.style.display='inline-flex';
-    // Highlight the chip
-    document.querySelectorAll('.mchip').forEach(c=>{
-      if(c.dataset.m===monthKey) c.classList.add('active');
-    });
-    loadMonthDashboard(monthKey);
-  } else {
-    badge.style.display='none';
-  }
-
-  if(name==='receiver') loadReceiverView();
+function fmtMK(k){return k.replace('_',' ')}
+function todayISO(){return new Date().toISOString().split('T')[0]}
+function currentMonthKey(){
+  const n=new Date();
+  return n.toLocaleDateString('en-GB',{month:'short'}).replace('.','')+'_'+n.getFullYear();
 }
 
-// ══ HEALTH ═════════════════════════════════════════
+// ══ NAV ══
+const PAGE_LABELS={order:'Add Order',receiver:'Receiver View',monthly:'Monthly Dashboard',sales:'Sales Manager'};
+function go(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  $('page-'+name).classList.add('active');
+  $('nav-'+name)?.classList.add('on');
+  $('tbtitle').textContent=PAGE_LABELS[name]||name;
+  const badge=$('tbbadge');
+  badge.style.display='none';
+  if(name==='receiver') loadReceiver();
+  if(name==='monthly')  loadMonthlyPage();
+  if(name==='sales')    loadSalesPage();
+}
+
+// ══ HEALTH ══
 async function checkHealth(){
   try{
     const d=await api('/api/health');
-    setConn('ok', d.sheet_name||'Connected', (d.tabs||[]).length+' tabs');
+    $('cdot').className='cdot ok';
+    $('ctitle').textContent=d.sheet_name||'Connected';
+    $('csub').textContent=(d.tabs||[]).length+' tabs';
   }catch(e){
-    setConn('err','Not connected',e.message.slice(0,35));
-  }
-}
-function setConn(state, title, sub){
-  document.getElementById('cdot').className='cdot '+state;
-  document.getElementById('ctitle').textContent=title;
-  document.getElementById('csub').textContent=sub;
-}
-
-// ══ MONTHS SIDEBAR ═════════════════════════════════
-async function loadMonthChips(){
-  const el=document.getElementById('month-chips');
-  try{
-    const d=await api('/api/months');
-    const months=d.months||[];
-    if(!months.length){
-      el.innerHTML='<div style="padding:6px 10px;font-size:11px;color:var(--dim)">No months yet.<br>Run DB Setup.</div>';
-      return;
-    }
-    el.innerHTML = months.map(m=>`
-      <div class="mchip ${m===activeMonth?'active':''}" data-m="${m}"
-        onclick="openMonth('${m}')">
-        <span>📋 ${fmtMonthKey(m)}</span>
-        <span class="mdot"></span>
-      </div>`).join('');
-  }catch(e){
-    el.innerHTML=`<div style="padding:6px 10px;font-size:11px;color:var(--red)">⚠ ${e.message.slice(0,30)}</div>`;
+    $('cdot').className='cdot err';
+    $('ctitle').textContent='Not connected';
+    $('csub').textContent=e.message.slice(0,32);
   }
 }
 
-function openMonth(key){
-  activeMonth=key;
-  showPage('month', key);
-}
-
-// ══ INIT DATA ══════════════════════════════════════
+// ══ INIT DATA ══
 async function loadInitData(){
   try{
     appData=await api('/api/init-data');
+    rvDate=appData.today;
     renderOrderForm();
-    document.getElementById('tb-date').textContent=fmtDate(appData.today);
+    $('tbdate').textContent=fmtD(appData.today);
   }catch(e){
-    document.getElementById('order-content').innerHTML=`
-      <div class="empty"><div class="ei">⚠️</div><h3>Not set up yet</h3>
-      <p>Open DB Setup in the sidebar and click ⚡ Run Setup.</p></div>`;
+    $('order-content').innerHTML=`<div class="empty"><div class="ei">⚠️</div><h3>Not set up</h3><p>Open DB Setup → ⚡ Run Setup</p></div>`;
   }
 }
 
-// ══ ORDER FORM ═════════════════════════════════════
+async function loadMonths(){
+  try{
+    const d=await api('/api/months');
+    allMonths=d.months||[];
+  }catch(e){allMonths=[];}
+}
+
+// ══ ORDER FORM ══
 function renderOrderForm(){
   if(!appData) return;
   const {products,slots,today}=appData;
-  document.getElementById('order-content').innerHTML=`
-    <div class="card" style="max-width:800px">
-      <div style="font-size:15px;font-weight:700;margin-bottom:3px">📦 Add New Order</div>
-      <div style="font-size:12px;color:var(--mut);margin-bottom:18px">Saves to Inventory_${appData.month} as Pending</div>
-
-      <div class="form-row col3">
-        <div class="form-group">
-          <label>Date</label>
-          <input type="date" class="input" id="o-date" value="${today}">
-        </div>
-        <div class="form-group">
-          <label>Account Name</label>
-          <input type="text" class="input" id="o-account" placeholder="e.g. Amazon-Gourab">
-        </div>
-        <div class="form-group">
-          <label>Order Name <span style="color:var(--dim)">(optional)</span></label>
-          <input type="text" class="input" id="o-order-name" placeholder="e.g. Monthly stock">
-        </div>
+  $('order-content').innerHTML=`
+  <div class="card" style="max-width:800px">
+    <div style="font-size:15px;font-weight:700;margin-bottom:3px">📦 Add New Order</div>
+    <div style="font-size:12px;color:var(--mut);margin-bottom:16px">Saves to Inventory_${appData.month} as Pending</div>
+    <div class="fr c3">
+      <div class="fg"><label>Date</label><input type="date" class="inp" id="odate" value="${today}"></div>
+      <div class="fg"><label>Account Name</label><input type="text" class="inp" id="oacct" placeholder="e.g. Amazon-Gourab"></div>
+      <div class="fg"><label>Order Name <span style="color:var(--dim)">(optional)</span></label><input type="text" class="inp" id="ooname" placeholder="e.g. Monthly stock"></div>
+    </div>
+    <div class="fg">
+      <label>Time Slot</label>
+      <div class="spills">${slots.map(s=>`<div class="spill" onclick="selSlot(this,'${s}')">${s}</div>`).join('')}</div>
+      <input type="hidden" id="oslot" value="">
+    </div>
+    <div class="div"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div>
+        <div style="font-size:13px;font-weight:600">Product Quantities</div>
+        <div style="font-size:11px;color:var(--mut);margin-top:2px;font-family:var(--mono)" id="qcnt">0 items</div>
       </div>
-
-      <div class="form-group">
-        <label>Time Slot</label>
-        <div class="slot-pills">${slots.map(s=>`<div class="slot-pill" onclick="selSlot(this,'${s}')">${s}</div>`).join('')}</div>
-        <input type="hidden" id="o-slot" value="">
-      </div>
-
-      <div class="divider"></div>
-
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div>
-          <div style="font-size:13px;font-weight:600">Product Quantities</div>
-          <div style="font-size:11px;color:var(--mut);margin-top:2px;font-family:var(--mono)" id="qty-count">0 items</div>
-        </div>
-        <button class="btn btn-o btn-sm" onclick="clearQtys()">Clear all</button>
-      </div>
-      <div class="qty-wrap" id="qty-wrap" oninput="updQtyCount()">
-        ${products.map(p=>`
-        <div class="qty-row">
-          <div class="qty-name">${p}</div>
-          <input type="number" class="qty-input" id="q_${slugify(p)}" min="0" placeholder="0"
-            oninput="this.classList.toggle('has',!!this.value&&this.value!='0')">
-        </div>`).join('')}
-      </div>
-
-      <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
-        <button class="btn btn-p" id="order-btn" onclick="submitOrder()" style="min-width:150px">📦 Submit Order</button>
-        <button class="btn btn-o" onclick="resetOrderForm()">Reset</button>
-        <span id="order-msg" style="font-size:12px;color:var(--green)"></span>
-      </div>
-    </div>`;
+      <button class="btn bo bsm" onclick="clrQtys()">Clear all</button>
+    </div>
+    <div class="qwrap" id="qwrap" oninput="updQCnt()">
+      ${products.map(p=>`<div class="qrow"><div style="font-size:12.5px">${p}</div>
+      <input type="number" class="qinp" id="q_${slug(p)}" min="0" placeholder="0"
+        oninput="this.classList.toggle('has',!!this.value&&this.value!='0')"></div>`).join('')}
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+      <button class="btn bp" id="orderbtn" onclick="submitOrder()" style="min-width:145px">📦 Submit Order</button>
+      <button class="btn bo" onclick="rstOrder()">Reset</button>
+      <span id="ordermsg" style="font-size:12px;color:var(--green)"></span>
+    </div>
+  </div>`;
 }
-
-function selSlot(el,slot){
-  document.querySelectorAll('.slot-pill').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('o-slot').value=slot;
+function selSlot(el,s){
+  document.querySelectorAll('.spill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on'); $('oslot').value=s;
 }
-function updQtyCount(){
-  const n=[...document.querySelectorAll('.qty-input')].filter(i=>parseInt(i.value)>0).length;
-  document.getElementById('qty-count').textContent=n+' item'+(n!==1?'s':'')+' entered';
+function updQCnt(){
+  const n=[...$('qwrap').querySelectorAll('.qinp')].filter(i=>parseInt(i.value)>0).length;
+  $('qcnt').textContent=n+' item'+(n!==1?'s':'')+' entered';
 }
-function clearQtys(){
-  document.querySelectorAll('.qty-input').forEach(i=>{i.value='';i.classList.remove('has');});
-  updQtyCount();
+function clrQtys(){
+  document.querySelectorAll('.qinp').forEach(i=>{i.value='';i.classList.remove('has');});
+  $('qcnt').textContent='0 items';
 }
-function resetOrderForm(){
-  clearQtys();
-  ['o-account','o-order-name'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('o-slot').value='';
-  document.querySelectorAll('.slot-pill').forEach(p=>p.classList.remove('active'));
-  document.getElementById('order-msg').textContent='';
+function rstOrder(){
+  clrQtys();
+  ['oacct','ooname'].forEach(id=>$(id).value='');
+  $('oslot').value='';
+  document.querySelectorAll('.spill').forEach(p=>p.classList.remove('on'));
+  $('ordermsg').textContent='';
 }
-
 async function submitOrder(){
-  const date=document.getElementById('o-date').value;
-  const slot=document.getElementById('o-slot').value;
-  const account=document.getElementById('o-account').value.trim();
-  const order_name=document.getElementById('o-order-name').value.trim();
+  const date=$('odate').value, slot=$('oslot').value;
+  const account=$('oacct').value.trim(), order_name=$('ooname').value.trim();
   if(!date){toast('Select a date','err');return;}
   if(!slot){toast('Select a time slot','err');return;}
   if(!account){toast('Enter account name','err');return;}
   const quantities={};
   (appData.products||[]).forEach(p=>{
-    const v=parseInt(document.getElementById('q_'+slugify(p))?.value||'0');
+    const v=parseInt($(('q_'+slug(p)))?.value||'0');
     if(v>0) quantities[p]=v;
   });
   if(!Object.keys(quantities).length){toast('Enter at least one quantity','err');return;}
-  const btn=document.getElementById('order-btn');
-  btn.disabled=true; btn.innerHTML='<div class="sp" style="border-top-color:#0d1117"></div> Saving…';
+  const btn=$('orderbtn'); btn.disabled=true;
+  btn.innerHTML='<div class="spn" style="color:#0d1117"></div> Saving…';
   try{
     await api('/api/add-order','POST',{date,slot,account,order_name,quantities});
-    toast('Order saved ✓');
-    document.getElementById('order-msg').textContent='✓ Saved';
-    resetOrderForm();
-    document.getElementById('o-date').value=appData.today;
-    // refresh month cache for current month
-    delete monthCache[appData.month];
+    toast('Order saved ✓'); $('ordermsg').textContent='✓ Saved';
+    rstOrder(); $('odate').value=appData.today;
+    monthlyData=null; salesData=null; // invalidate caches
   }catch(e){toast('Error: '+e.message,'err');}
   btn.disabled=false; btn.innerHTML='📦 Submit Order';
 }
 
-// ══ RECEIVER VIEW ══════════════════════════════════
-async function loadReceiverView(){
-  document.getElementById('receiver-content').innerHTML=
-    '<div class="loading"><div class="sp"></div> Loading today\'s orders…</div>';
+// ══ RECEIVER ══
+async function loadReceiver(date){
+  if(date) rvDate=date;
+  if(!rvDate) rvDate=todayISO();
+  $('rv-content').innerHTML='<div class="ld"><div class="spn" style="color:var(--green)"></div> Loading orders for '+rvDate+'…</div>';
   try{
-    rvData=await api('/api/receiver');
+    rvData=await api('/api/receiver?date='+encodeURIComponent(rvDate));
     rvSlot='All';
-    renderReceiverPage();
+    renderRvPage();
   }catch(e){
-    document.getElementById('receiver-content').innerHTML=
-      `<div class="empty"><div class="ei">⚠️</div><h3>Error</h3><p>${e.message}</p></div>`;
+    $('rv-content').innerHTML=`<div class="empty"><div class="ei">⚠️</div><h3>Error</h3><p>${e.message}</p></div>`;
   }
 }
-
-function renderReceiverPage(){
+function renderRvPage(){
   if(!rvData) return;
-  const {products,slots,orders,today}=rvData;
-  const totalItems=orders.reduce((s,o)=>s+Object.values(o.quantities).reduce((a,b)=>a+b,0),0);
+  const {products,slots,orders,date}=rvData;
+  const total=orders.reduce((s,o)=>s+Object.values(o.quantities).reduce((a,b)=>a+b,0),0);
   const allSlots=['All',...slots];
-
-  document.getElementById('receiver-content').innerHTML=`
-    <div style="max-width:920px">
-      <!-- Stats -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
-        <div class="stat-box"><div class="stat-lbl">Date</div><div class="stat-val" style="font-size:13px;color:var(--blue)">${fmtDate(today)}</div></div>
-        <div class="stat-box"><div class="stat-lbl">Pending Orders</div><div class="stat-val" style="color:var(--yellow)">${orders.length}</div></div>
-        <div class="stat-box"><div class="stat-lbl">Total Items</div><div class="stat-val" style="color:var(--green)">${totalItems}</div></div>
+  $('rv-content').innerHTML=`
+  <div style="max-width:920px">
+    <!-- Date picker -->
+    <div class="card" style="padding:14px 18px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div style="font-size:13px;font-weight:600">📆 Viewing Date</div>
+        <input type="date" class="inp" style="width:170px" value="${date}"
+          onchange="loadReceiver(this.value)">
+        <button class="btn bo bsm" onclick="loadReceiver('${todayISO()}')">Today</button>
+        <div style="font-size:12px;color:var(--mut);margin-left:auto">${fmtD(date)}</div>
       </div>
-
-      <!-- Slot filter -->
-      <div class="card" style="padding:14px 18px;margin-bottom:16px">
-        <div style="font-size:12.5px;font-weight:600;margin-bottom:10px">Filter by Slot</div>
-        <div class="slot-pills" id="rv-pills">
-          ${allSlots.map(s=>`<div class="slot-pill ${s===rvSlot?'active':''}"
-            onclick="setRvSlot('${s}',this)">${s==='All'?'All Slots':s}</div>`).join('')}
-        </div>
+    </div>
+    <!-- Stats -->
+    <div class="sg3">
+      <div class="sbox"><div class="slbl">Pending Orders</div><div class="sval" style="color:var(--yellow)">${orders.length}</div></div>
+      <div class="sbox"><div class="slbl">Total Items</div><div class="sval" style="color:var(--green)">${total}</div></div>
+      <div class="sbox"><div class="slbl">Slots Active</div><div class="sval" style="color:var(--blue)">${slots.length}</div></div>
+    </div>
+    <!-- Slot filter -->
+    <div class="card" style="padding:14px 18px;margin-bottom:16px">
+      <div style="font-size:12.5px;font-weight:600;margin-bottom:10px">Filter by Slot</div>
+      <div class="spills" id="rvpills">
+        ${allSlots.map(s=>`<div class="spill ${s===rvSlot?'on':''}" onclick="setRvSlot('${s}',this)">${s==='All'?'All Slots':s}</div>`).join('')}
       </div>
-
-      <!-- Summary table -->
-      <div class="card">
-        <div style="font-size:14px;font-weight:700;margin-bottom:14px">
-          📊 Total Expected Items
-          <span id="rv-slot-label" style="font-size:11.5px;font-weight:400;color:var(--mut);margin-left:6px">(all slots)</span>
-        </div>
-        <div id="rv-summary"></div>
+    </div>
+    <!-- Summary -->
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px">
+        📊 Total Expected Items
+        <span id="rvslotlbl" style="font-size:11.5px;font-weight:400;color:var(--mut);margin-left:6px">(all slots)</span>
       </div>
-
-      <div style="height:1px;background:var(--bd);margin-bottom:18px"></div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:14px">📦 Individual Order Breakdown</div>
-      <div id="rv-orders"></div>
-    </div>`;
-
+      <div id="rvsum"></div>
+    </div>
+    <div class="div"></div>
+    <div style="font-size:14px;font-weight:700;margin-bottom:14px">📦 Individual Order Breakdown</div>
+    <div id="rvords"></div>
+  </div>`;
   renderRvContent();
 }
-
-function setRvSlot(slot,btn){
-  rvSlot=slot;
-  document.querySelectorAll('#rv-pills .slot-pill').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active');
-  const label=document.getElementById('rv-slot-label');
-  if(label) label.textContent = slot==='All'?'(all slots)':'— '+slot;
+function setRvSlot(s,btn){
+  rvSlot=s;
+  document.querySelectorAll('#rvpills .spill').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  const el=$('rvslotlbl'); if(el) el.textContent=s==='All'?'(all slots)':'— '+s;
   renderRvContent();
 }
-
 function renderRvContent(){
   if(!rvData) return;
   const {products,orders}=rvData;
-  const filtered=rvSlot==='All'?orders:orders.filter(o=>o.slot===rvSlot);
-  const totals={};
-  filtered.forEach(o=>products.forEach(p=>{ totals[p]=(totals[p]||0)+(o.quantities[p]||0); }));
-  const active=products.filter(p=>(totals[p]||0)>0);
-
-  // Summary
-  const sumEl=document.getElementById('rv-summary');
-  if(sumEl){
-    sumEl.innerHTML = !active.length
-      ? '<div style="padding:8px 0;font-size:13px;color:var(--mut)">No pending items.</div>'
-      : `<div class="tbl-wrap"><table class="sum-tbl">
-          <thead><tr><th>Product Name</th><th class="num">Total Qty</th></tr></thead>
-          <tbody>${active.map(p=>`<tr><td>${p}</td><td class="num">${totals[p]}</td></tr>`).join('')}</tbody>
-         </table></div>`;
+  const filt=rvSlot==='All'?orders:orders.filter(o=>o.slot===rvSlot);
+  const tot={};
+  filt.forEach(o=>products.forEach(p=>{tot[p]=(tot[p]||0)+(o.quantities[p]||0);}));
+  const active=products.filter(p=>(tot[p]||0)>0);
+  const sel=$('rvsum');
+  if(sel) sel.innerHTML=!active.length
+    ?'<div style="padding:8px 0;font-size:13px;color:var(--mut)">No pending items for this filter.</div>'
+    :`<div class="twrap"><table>
+      <thead><tr><th>Product Name</th><th class="r">Total Qty</th></tr></thead>
+      <tbody>${active.map(p=>`<tr><td>${p}</td><td class="r" style="color:var(--green)">${tot[p]}</td></tr>`).join('')}</tbody>
+      </table></div>`;
+  const oel=$('rvords');
+  if(!oel) return;
+  if(!filt.length){
+    oel.innerHTML='<div class="empty" style="padding:28px 0"><div class="ei">🎉</div><h3>All clear!</h3><p>No pending orders'+(rvSlot!=='All'?' for '+rvSlot:'')+'.</p></div>';
+    return;
   }
-
-  // Orders
-  const ordEl=document.getElementById('rv-orders');
-  if(ordEl){
-    if(!filtered.length){
-      ordEl.innerHTML='<div class="empty" style="padding:30px 0"><div class="ei">🎉</div><h3>All clear!</h3><p>No pending orders for this slot.</p></div>';
-    } else {
-      ordEl.innerHTML=filtered.map(o=>{
-        const items=products.filter(p=>(o.quantities[p]||0)>0);
-        const lbl=o.order_name||o.account;
-        return `<div class="order-row" id="ord-${o.row_index}">
-          <div class="order-hd" onclick="togOrd(${o.row_index})">
-            <span class="ochev">▶</span>
-            <span style="font-size:15px">📦</span>
-            <span class="olabel">${lbl} <span style="font-weight:400;font-size:11.5px;color:var(--mut)">(${o.account})</span></span>
-            <span class="oslot-badge">${o.slot}</span>
-            <span class="ocount">${items.length} item${items.length!==1?'s':''}</span>
-          </div>
-          <div class="order-body">
-            <div class="ometa">
-              <span><b>Account:</b> ${o.account}</span>
-              <span><b>Date:</b> ${o.date}</span>
-              <span><b>Slot:</b> ${o.slot}</span>
-            </div>
-            <div class="items-grid">
-              ${items.map(p=>`<div class="oitem"><span class="oi-n">${p}</span><span class="oi-q">${o.quantities[p]}</span></div>`).join('')}
-            </div>
-            <button class="btn-deliver" id="dbtn-${o.row_index}" onclick="markDel(${o.row_index})">
-              ✓ Mark as Delivered
-            </button>
-          </div>
-        </div>`;
-      }).join('');
-    }
-  }
+  oel.innerHTML=filt.map(o=>{
+    const items=products.filter(p=>(o.quantities[p]||0)>0);
+    const lbl=o.order_name||o.account;
+    return `<div class="orow" id="ord-${o.row_index}">
+      <div class="ohd" onclick="togOrd(${o.row_index})">
+        <span class="ochv">▶</span><span style="font-size:15px">📦</span>
+        <span class="olbl">${lbl} <span style="font-weight:400;font-size:11px;color:var(--mut)">(${o.account})</span></span>
+        <span class="oslot">${o.slot}</span>
+        <span class="ocnt">${items.length} item${items.length!==1?'s':''}</span>
+      </div>
+      <div class="obody">
+        <div class="ometa"><span><b>Account:</b> ${o.account}</span><span><b>Date:</b> ${o.date}</span><span><b>Slot:</b> ${o.slot}</span></div>
+        <div class="igrid">${items.map(p=>`<div class="oitem"><span class="oin">${p}</span><span class="oiq">${o.quantities[p]}</span></div>`).join('')}</div>
+        <button class="bdel" id="dbtn-${o.row_index}" onclick="markDel(${o.row_index})">✓ Mark as Delivered</button>
+      </div>
+    </div>`;
+  }).join('');
 }
-
-function togOrd(idx){
-  document.getElementById('ord-'+idx).classList.toggle('open');
-}
-
-async function markDel(rowIndex){
-  const btn=document.getElementById('dbtn-'+rowIndex);
-  btn.textContent='Saving…'; btn.disabled=true;
+function togOrd(idx){$('ord-'+idx).classList.toggle('open')}
+async function markDel(idx){
+  const btn=$('dbtn-'+idx); btn.textContent='Saving…'; btn.disabled=true;
   try{
-    await api('/api/mark-delivered','POST',{row_index:rowIndex});
+    await api('/api/mark-delivered','POST',{row_index:idx});
     toast('Delivered ✓');
-    rvData.orders=rvData.orders.filter(o=>o.row_index!==rowIndex);
+    rvData.orders=rvData.orders.filter(o=>o.row_index!==idx);
     renderRvContent();
-    // Show green tick on the row header
-    const row=document.getElementById('ord-'+rowIndex);
+    const row=$('ord-'+idx);
     if(row){
-      const lbl=row.querySelector('.olabel')?.textContent||'';
-      const slot=row.querySelector('.oslot-badge')?.textContent||'';
-      row.style.borderColor='rgba(63,185,80,.3)';
-      row.style.background='rgba(63,185,80,.04)';
-      row.innerHTML=`<div class="order-hd" style="cursor:default">
+      const lbl=row.querySelector('.olbl')?.textContent||'';
+      const slot=row.querySelector('.oslot')?.textContent||'';
+      row.style.cssText='border-color:rgba(63,185,80,.3);background:rgba(63,185,80,.04)';
+      row.innerHTML=`<div class="ohd" style="cursor:default">
         <span style="font-size:15px">✅</span>
-        <span class="olabel" style="color:var(--mut)">${lbl}</span>
-        <span class="oslot-badge">${slot}</span>
+        <span class="olbl" style="color:var(--mut)">${lbl}</span>
+        <span class="oslot">${slot}</span>
         <span class="del-badge">✓ Delivered</span>
       </div>`;
-      document.getElementById('rv-orders').prepend(row);
+      $('rvords').prepend(row);
     }
-    // Invalidate month cache
-    if(appData) delete monthCache[appData.month];
-  }catch(e){
-    toast('Error: '+e.message,'err');
-    btn.textContent='✓ Mark as Delivered'; btn.disabled=false;
-  }
+    monthlyData=null; salesData=null;
+  }catch(e){toast('Error: '+e.message,'err'); btn.textContent='✓ Mark as Delivered'; btn.disabled=false;}
 }
 
-// ══ MONTH DASHBOARD ════════════════════════════════
-async function loadMonthDashboard(key){
-  const el=document.getElementById('month-content');
-  el.innerHTML='<div class="loading"><div class="sp"></div> Loading '+fmtMonthKey(key)+'…</div>';
-
+// ══ MONTHLY DASHBOARD ══
+async function loadMonthlyPage(){
+  await loadMonths();
+  if(!activeMonthlyKey) activeMonthlyKey=currentMonthKey();
+  renderMonthlyPicker();
+  await fetchAndRenderMonthly(activeMonthlyKey);
+}
+function renderMonthlyPicker(){
+  const opts=allMonths.length
+    ? allMonths.map(m=>`<option value="${m}" ${m===activeMonthlyKey?'selected':''}>${fmtMK(m)}</option>`).join('')
+    : `<option value="${activeMonthlyKey}">${fmtMK(activeMonthlyKey)}</option>`;
+  // inject picker at top of monthly-content if page is active
+  const existing=$('month-picker-wrap');
+  if(existing) existing.querySelector('select').innerHTML=opts;
+}
+async function fetchAndRenderMonthly(key){
+  activeMonthlyKey=key;
+  $('monthly-content').innerHTML=`
+    <div id="month-picker-wrap" class="card" style="padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="font-size:13px;font-weight:600">📅 Select Month</div>
+      <select class="month-sel" onchange="fetchAndRenderMonthly(this.value)">
+        ${allMonths.map(m=>`<option value="${m}" ${m===key?'selected':''}>${fmtMK(m)}</option>`).join('')}
+      </select>
+      <button class="btn bo bsm" onclick="fetchAndRenderMonthly('${currentMonthKey()}')">Current Month</button>
+      <div style="margin-left:auto;font-size:12px;color:var(--mut);font-family:var(--mono)">Inventory_${key}</div>
+    </div>
+    <div class="ld"><div class="spn" style="color:var(--green)"></div> Loading ${fmtMK(key)}…</div>`;
   try{
-    // Cache per month key
-    if(!monthCache[key]) monthCache[key]=await api('/api/month-dashboard/'+encodeURIComponent(key));
-    const d=monthCache[key];
-    renderMonthDashboard(d);
+    if(!monthlyData || monthlyData.month_key!==key)
+      monthlyData=await api('/api/month-dashboard/'+encodeURIComponent(key));
+    renderMonthly(monthlyData);
   }catch(e){
-    el.innerHTML=`<div class="empty"><div class="ei">⚠️</div><h3>Error</h3><p>${e.message}</p></div>`;
+    $('monthly-content').innerHTML+=`<div class="empty"><div class="ei">⚠️</div><h3>Error</h3><p>${e.message}</p></div>`;
   }
 }
-
-function renderMonthDashboard(d){
-  const el=document.getElementById('month-content');
+function renderMonthly(d){
   const {month_key,products,total_orders,delivered,pending,prod_totals,date_counts,slot_counts,orders}=d;
-
-  const pct = total_orders>0 ? Math.round(delivered/total_orders*100) : 0;
-
-  // Top products delivered (sort by qty desc)
+  const pct=total_orders>0?Math.round(delivered/total_orders*100):0;
   const topProds=[...products].sort((a,b)=>(prod_totals[b]||0)-(prod_totals[a]||0)).filter(p=>(prod_totals[p]||0)>0);
-
-  // Slot bar chart max
   const maxSlot=Math.max(...Object.values(slot_counts),1);
+  const pickerHTML=$('month-picker-wrap')?.outerHTML||'';
 
-  // Date activity cells
-  const dateCells=Object.entries(date_counts).map(([date,count])=>`
-    <div class="date-cell">
-      <span class="dc-date">${date.slice(5)}</span>
-      <span class="dc-count">${count}</span>
-      <span style="font-size:9px;color:var(--mut)">orders</span>
-    </div>`).join('');
-
-  // Order history table (last 20)
-  const recent=orders.slice(-20).reverse();
-  const histRows=recent.map(o=>{
-    const statusCls=o.status.toLowerCase()==='delivered'?'badge-g':'badge-y';
-    const totalQty=Object.values(o.quantities).reduce((a,b)=>a+b,0);
-    return `<tr class="history-row">
-      <td>${o.date}</td>
-      <td>${o.account}</td>
-      <td>${o.order_name||'—'}</td>
-      <td><span style="font-family:var(--mono);font-size:11px;background:var(--bbg);color:var(--blue);padding:2px 7px;border-radius:10px">${o.slot}</span></td>
-      <td class="num">${totalQty}</td>
-      <td><span class="badge ${statusCls}">${o.status}</span></td>
-    </tr>`;
-  }).join('');
-
-  el.innerHTML=`
-    <div style="max-width:1100px">
-
-      <!-- Header -->
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px">
-        <div style="font-size:22px;font-weight:700">📅 ${fmtMonthKey(month_key)}</div>
-        <div style="font-size:12px;color:var(--mut);background:var(--s2);border:1px solid var(--bd);padding:3px 12px;border-radius:10px;font-family:var(--mono)">Inventory_${month_key}</div>
+  $('monthly-content').innerHTML=`
+  ${pickerHTML}
+  <div style="max-width:1100px">
+    <div class="sg4">
+      <div class="sbox"><div class="slbl">Total Orders</div><div class="sval" style="color:var(--blue)">${total_orders}</div><div class="ssub">All rows</div></div>
+      <div class="sbox"><div class="slbl">Delivered</div><div class="sval" style="color:var(--green)">${delivered}</div>
+        <div class="prog"><div class="progf" style="width:${pct}%;background:var(--green)"></div></div></div>
+      <div class="sbox"><div class="slbl">Pending</div><div class="sval" style="color:var(--yellow)">${pending}</div>
+        <div class="prog"><div class="progf" style="width:${100-pct}%;background:var(--yellow)"></div></div></div>
+      <div class="sbox"><div class="slbl">Delivery Rate</div>
+        <div class="sval" style="color:${pct>=80?'var(--green)':pct>=50?'var(--yellow)':'var(--red)'}">${pct}%</div>
+        <div class="ssub">${delivered} of ${total_orders}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+      <div class="card" style="margin:0">
+        <div style="font-size:13.5px;font-weight:700;margin-bottom:14px">📦 Products Delivered</div>
+        ${topProds.length?`<div class="twrap"><table>
+          <thead><tr><th>#</th><th>Product</th><th class="r">Qty Delivered</th></tr></thead>
+          <tbody>${topProds.map((p,i)=>`<tr><td style="color:var(--dim);font-size:11px;font-family:var(--mono)">${i+1}</td>
+            <td>${p}</td><td class="r" style="color:var(--green)">${prod_totals[p]}</td></tr>`).join('')}</tbody>
+          </table></div>`:'<div style="padding:8px 0;font-size:13px;color:var(--mut)">No delivered orders yet.</div>'}
       </div>
-
-      <!-- Stat boxes -->
-      <div class="stat-grid">
-        <div class="stat-box">
-          <div class="stat-lbl">Total Orders</div>
-          <div class="stat-val" style="color:var(--blue)">${total_orders}</div>
-          <div class="stat-sub">All order rows</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-lbl">Delivered</div>
-          <div class="stat-val" style="color:var(--green)">${delivered}</div>
-          <div class="stat-sub">Status = Delivered</div>
-          <div class="prog-wrap"><div class="prog-fill" style="width:${pct}%;background:var(--green)"></div></div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-lbl">Pending</div>
-          <div class="stat-val" style="color:var(--yellow)">${pending}</div>
-          <div class="stat-sub">Awaiting delivery</div>
-          <div class="prog-wrap"><div class="prog-fill" style="width:${100-pct}%;background:var(--yellow)"></div></div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-lbl">Delivery Rate</div>
-          <div class="stat-val" style="color:${pct>=80?'var(--green)':pct>=50?'var(--yellow)':'var(--red)'}">${pct}%</div>
-          <div class="stat-sub">${delivered} of ${total_orders} delivered</div>
+      <div class="card" style="margin:0">
+        <div style="font-size:13.5px;font-weight:700;margin-bottom:16px">🕐 Orders by Slot</div>
+        <div class="slot-bars">
+          ${Object.entries(slot_counts).sort((a,b)=>b[1]-a[1]).map(([s,c])=>`
+          <div class="sbar">
+            <div class="sbarlbl">${s}</div>
+            <div class="sbartr"><div class="sbarf" style="width:${Math.round(c/maxSlot*100)}%"></div></div>
+            <div class="sbarc">${c}</div>
+          </div>`).join('')||'<div style="font-size:13px;color:var(--mut)">No data.</div>'}
         </div>
       </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
-
-        <!-- Delivered product totals -->
-        <div class="card" style="margin:0">
-          <div style="font-size:13.5px;font-weight:700;margin-bottom:14px">📦 Products Delivered</div>
-          ${topProds.length ? `
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>#</th><th>Product</th><th class="num">Qty Delivered</th></tr></thead>
-              <tbody>${topProds.map((p,i)=>`
-                <tr>
-                  <td style="color:var(--dim);font-size:11px;font-family:var(--mono)">${i+1}</td>
-                  <td>${p}</td>
-                  <td class="num" style="color:var(--green)">${prod_totals[p]}</td>
-                </tr>`).join('')}
-              </tbody>
-            </table>
-          </div>` : '<div style="padding:10px 0;font-size:13px;color:var(--mut)">No delivered orders yet.</div>'}
-        </div>
-
-        <!-- Slot breakdown -->
-        <div class="card" style="margin:0">
-          <div style="font-size:13.5px;font-weight:700;margin-bottom:16px">🕐 Orders by Slot</div>
-          <div class="slot-bars">
-            ${Object.entries(slot_counts).sort((a,b)=>b[1]-a[1]).map(([slot,count])=>`
-              <div class="slot-bar-row">
-                <div class="slot-bar-label">${slot}</div>
-                <div class="slot-bar-track">
-                  <div class="slot-bar-fill" style="width:${Math.round(count/maxSlot*100)}%"></div>
-                </div>
-                <div class="slot-bar-count">${count}</div>
-              </div>`).join('')}
-          </div>
-          ${!Object.keys(slot_counts).length?'<div style="font-size:13px;color:var(--mut)">No data yet.</div>':''}
-        </div>
-      </div>
-
-      <!-- Daily activity -->
-      ${dateCells ? `
-      <div class="card">
-        <div style="font-size:13.5px;font-weight:700;margin-bottom:14px">📆 Daily Activity</div>
-        <div class="date-grid">${dateCells}</div>
-      </div>` : ''}
-
-      <!-- Order history -->
-      <div class="card">
-        <div style="font-size:13.5px;font-weight:700;margin-bottom:14px">🗒️ Order History <span style="font-weight:400;font-size:11.5px;color:var(--mut)">(latest ${Math.min(20,orders.length)} of ${orders.length})</span></div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>Date</th><th>Account</th><th>Order Name</th>
-              <th>Slot</th><th class="num">Items</th><th>Status</th>
-            </tr></thead>
-            <tbody>${histRows||'<tr><td colspan="6" style="text-align:center;color:var(--mut);padding:20px">No orders yet</td></tr>'}</tbody>
-          </table>
-        </div>
-      </div>
-
-    </div>`;
+    </div>
+    ${Object.keys(date_counts).length?`<div class="card">
+      <div style="font-size:13.5px;font-weight:700;margin-bottom:14px">📆 Daily Activity</div>
+      <div class="dcells">${Object.entries(date_counts).map(([dt,c])=>`
+        <div class="dcell"><span class="dcd">${dt.slice(5)}</span><span class="dcc">${c}</span>
+        <span style="font-size:9px;color:var(--mut)">orders</span></div>`).join('')}
+      </div></div>`:''}
+    <div class="card">
+      <div style="font-size:13.5px;font-weight:700;margin-bottom:14px">🗒️ Order History
+        <span style="font-weight:400;font-size:11.5px;color:var(--mut)">(latest ${Math.min(20,orders.length)} of ${orders.length})</span></div>
+      <div class="twrap"><table>
+        <thead><tr><th>Date</th><th>Account</th><th>Order Name</th><th>Slot</th><th class="r">Items</th><th>Status</th></tr></thead>
+        <tbody>${orders.slice(-20).reverse().map(o=>{
+          const tq=Object.values(o.quantities).reduce((a,b)=>a+b,0);
+          const sc=o.status.toLowerCase()==='delivered'?'bg':'by2';
+          return `<tr><td style="font-family:var(--mono);font-size:11.5px">${o.date}</td>
+            <td>${o.account}</td><td>${o.order_name||'—'}</td>
+            <td><span style="font-family:var(--mono);font-size:10.5px;background:var(--bbg);color:var(--blue);padding:2px 7px;border-radius:10px">${o.slot}</span></td>
+            <td class="r">${tq}</td>
+            <td><span class="badge ${sc}">${o.status}</span></td></tr>`;
+        }).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--mut);padding:18px">No orders yet</td></tr>'}
+        </tbody>
+      </table></div>
+    </div>
+  </div>`;
+  // Re-attach picker event after innerHTML replace
+  const sel=$('monthly-content').querySelector('.month-sel');
+  if(sel) sel.onchange=function(){fetchAndRenderMonthly(this.value)};
 }
 
-// ══ DB SETUP ═══════════════════════════════════════
+// ══ SALES MANAGER ══
+async function loadSalesPage(){
+  await loadMonths();
+  if(!activeSalesKey) activeSalesKey=currentMonthKey();
+  await fetchAndRenderSales(activeSalesKey);
+}
+async function fetchAndRenderSales(key){
+  activeSalesKey=key;
+  $('sales-content').innerHTML=`
+    <div id="sales-picker-wrap" class="card" style="padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="font-size:13px;font-weight:600">💰 Select Month</div>
+      <select class="month-sel" onchange="fetchAndRenderSales(this.value)">
+        ${allMonths.map(m=>`<option value="${m}" ${m===key?'selected':''}>${fmtMK(m)}</option>`).join('')}
+      </select>
+      <button class="btn bo bsm" onclick="fetchAndRenderSales('${currentMonthKey()}')">Current Month</button>
+    </div>
+    <div class="ld"><div class="spn" style="color:var(--green)"></div> Loading sales data…</div>`;
+  try{
+    salesData=await api('/api/sales-manager/'+encodeURIComponent(key));
+    renderSales(salesData);
+  }catch(e){
+    $('sales-content').innerHTML+=`<div class="empty"><div class="ei">⚠️</div><h3>Error</h3><p>${e.message}</p></div>`;
+  }
+}
+function renderSales(d){
+  const {month_key,products,salesmen,delivered,sales,remaining}=d;
+  const pickerHTML=$('sales-picker-wrap')?.outerHTML||'';
+  const totalSold={};
+  products.forEach(p=>{totalSold[p]=salesmen.reduce((s,sm)=>s+(sales[sm]?.[p]||0),0);});
+
+  $('sales-content').innerHTML=`
+  ${pickerHTML}
+  <div style="max-width:1100px">
+    <!-- Summary stats -->
+    <div class="sg3" style="margin-bottom:20px">
+      <div class="sbox"><div class="slbl">Products Tracked</div><div class="sval" style="color:var(--blue)">${products.length}</div></div>
+      <div class="sbox"><div class="slbl">Total Delivered</div><div class="sval" style="color:var(--green)">${Object.values(delivered).reduce((a,b)=>a+b,0)}</div></div>
+      <div class="sbox"><div class="slbl">Total Sold</div><div class="sval" style="color:var(--yellow)">${Object.values(totalSold).reduce((a,b)=>a+b,0)}</div></div>
+    </div>
+
+    <!-- Main sales table -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div style="font-size:14px;font-weight:700">📊 Sales Breakdown — ${fmtMK(month_key)}</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn bo bsm" onclick="fetchAndRenderSales('${month_key}')">↺ Refresh</button>
+          <button class="btn bpurp bsm" onclick="transferStock('${month_key}')">
+            📦 Transfer Remaining → Next Month
+          </button>
+        </div>
+      </div>
+      <div class="twrap">
+        <table class="smtbl">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th class="r">Total Delivered</th>
+              ${salesmen.map(s=>`<th class="r salesman">${s}</th>`).join('')}
+              <th class="r">Total Sold</th>
+              <th class="r remain">Remaining</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${products.map(p=>{
+              const del=delivered[p]||0;
+              const sold=totalSold[p]||0;
+              const rem=remaining[p]||0;
+              return `<tr>
+                <td>${p}</td>
+                <td class="r total-del">${del}</td>
+                ${salesmen.map(sm=>`<td class="r salesman">
+                  <input class="cell-inp" type="number" min="0" value="${sales[sm]?.[p]||0}"
+                    onchange="updateSale('${month_key}','${sm}','${p}',this.value)"
+                    title="Edit ${sm}'s sale for ${p}">
+                </td>`).join('')}
+                <td class="r" style="color:var(--yellow)">${sold}</td>
+                <td class="r remain">${rem}</td>
+              </tr>`;
+            }).join('')}
+            <!-- Totals row -->
+            <tr style="background:rgba(255,255,255,.03);font-weight:700;border-top:2px solid var(--bd)">
+              <td style="font-weight:700;color:var(--text)">TOTAL</td>
+              <td class="r total-del">${Object.values(delivered).reduce((a,b)=>a+b,0)}</td>
+              ${salesmen.map(sm=>`<td class="r salesman">${products.reduce((s,p)=>s+(sales[sm]?.[p]||0),0)}</td>`).join('')}
+              <td class="r" style="color:var(--yellow)">${Object.values(totalSold).reduce((a,b)=>a+b,0)}</td>
+              <td class="r remain">${Object.values(remaining).reduce((a,b)=>a+b,0)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;font-size:11.5px;color:var(--mut)">
+        💡 Click any number in the salesman columns to edit. Changes are saved to Sales_Log immediately.
+      </div>
+    </div>
+  </div>`;
+  // Re-attach picker event
+  const sel=$('sales-content').querySelector('.month-sel');
+  if(sel) sel.onchange=function(){fetchAndRenderSales(this.value)};
+}
+
+async function updateSale(month_key, buyer, product, newVal){
+  const qty=parseInt(newVal)||0;
+  // Determine date range for this month to log properly
+  const parts=month_key.split('_');
+  const date=new Date().toISOString().split('T')[0]; // use today as log date
+  try{
+    await api('/api/log-sale','POST',{date,buyer,product,qty,month_key});
+    // Refresh sales data silently
+    salesData=null;
+    toast(`${buyer}: ${product} updated ✓`);
+    setTimeout(()=>fetchAndRenderSales(month_key),800);
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+
+async function transferStock(month_key){
+  if(!salesData){toast('Load sales data first','err');return;}
+  const remaining=salesData.remaining;
+  const nzProds=Object.entries(remaining).filter(([,v])=>v>0);
+  if(!nzProds.length){
+    if(!confirm('All remaining stock is 0. Still create next month sheet?')) return;
+  } else {
+    const summary=nzProds.map(([p,v])=>`${p}: ${v}`).join('\n');
+    if(!confirm(`Transfer remaining stock to next month's Old Stock?\n\n${summary}\n\nThis will create the next month's inventory sheet.`)) return;
+  }
+  try{
+    const d=await api('/api/transfer-stock','POST',{from_month:month_key, remaining});
+    toast(`✓ Transferred to ${d.next_month} as Old Stock`);
+    await loadMonths();
+  }catch(e){toast('Transfer failed: '+e.message,'err');}
+}
+
+// ══ DB SETUP ══
 function toggleSetup(){
-  const d=document.getElementById('setup-drawer');
-  const a=document.getElementById('setup-arrow');
-  d.classList.toggle('open');
-  a.textContent=d.classList.contains('open')?'▼':'▶';
+  const dr=$('sdr'), ar=$('sarrow');
+  dr.classList.toggle('open');
+  ar.textContent=dr.classList.contains('open')?'▼':'▶';
 }
-function updateProdCount(){
-  const n=document.getElementById('products-input').value.split('\n').map(l=>l.trim()).filter(Boolean).length;
-  document.getElementById('prod-count').textContent=n+' products';
+function updPCnt(){
+  const n=$('pinput').value.split('\n').map(l=>l.trim()).filter(Boolean).length;
+  $('pcnt').textContent=n+' products';
 }
-updateProdCount();
-
+updPCnt();
 async function runSetup(){
-  const products=document.getElementById('products-input').value.split('\n').map(l=>l.trim()).filter(Boolean);
-  const slots=[...document.querySelectorAll('.slot-chip.on')].map(e=>e.dataset.s);
-  if(!products.length){toast('Add products first','err');return;}
-  if(!slots.length){toast('Select at least one slot','err');return;}
-  const btn=document.getElementById('setup-btn');
-  btn.disabled=true; btn.innerHTML='<div class="sp" style="color:var(--yellow)"></div> Running…';
-  const res=document.getElementById('setup-result');
+  const products=$('pinput').value.split('\n').map(l=>l.trim()).filter(Boolean);
+  const slots=[...$('sslots').querySelectorAll('.schip.on')].map(e=>e.dataset.s);
+  if(!products.length){toast('Add products','err');return;}
+  if(!slots.length){toast('Select slots','err');return;}
+  const btn=$('setupbtn'); btn.disabled=true;
+  btn.innerHTML='<div class="spn" style="color:var(--yellow)"></div> Running…';
+  const res=$('setupres');
   try{
     const d=await api('/api/setup','POST',{products,slots});
-    res.innerHTML=`<span style="color:var(--green)">✓ ${d.product_count} products · ${d.inv_sheet} created</span>`;
+    res.innerHTML=`<span style="color:var(--green)">✓ ${d.product_count} products · ${d.inv_sheet} ready</span>`;
     toast('Setup complete ✓');
-    await Promise.all([loadInitData(), loadMonthChips(), checkHealth()]);
-    monthCache={};
+    await Promise.all([loadInitData(),loadMonths(),checkHealth()]);
+    monthlyData=null; salesData=null;
   }catch(e){
     res.innerHTML=`<span style="color:var(--red)">✗ ${e.message}</span>`;
     toast('Setup failed','err');
@@ -879,12 +849,11 @@ async function runSetup(){
   btn.disabled=false; btn.innerHTML='⚡ Run Setup';
 }
 
-// ══ BOOT ═══════════════════════════════════════════
+// ══ BOOT ══
 async function boot(){
-  const now=new Date();
-  document.getElementById('tb-date').textContent=
-    now.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  await Promise.all([checkHealth(), loadInitData(), loadMonthChips()]);
+  rvDate=todayISO();
+  $('tbdate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  await Promise.all([checkHealth(),loadInitData(),loadMonths()]);
 }
 boot();
 </script>
