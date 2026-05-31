@@ -314,12 +314,22 @@ function toast(msg,t='ok'){
   window._tt=setTimeout(()=>el.style.display='none',3000);
 }
 function slug(s){return s.replace(/[^a-zA-Z0-9]/g,'_')}
-async function api(url,method='GET',body=null){
+async function api(url,method='GET',body=null,timeout=18000){
   const o={method,headers:{}};
   if(body){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body);}
-  const r=await fetch(url,o), d=await r.json();
-  if(d.error) throw new Error(d.error);
-  return d;
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeout);
+  try{
+    const r=await fetch(url,{...o,signal:controller.signal});
+    clearTimeout(timer);
+    const d=await r.json();
+    if(d.error) throw new Error(d.error);
+    return d;
+  }catch(e){
+    clearTimeout(timer);
+    if(e.name==='AbortError') throw new Error('Request timed out — Render may be cold-starting (60s). Please retry.');
+    throw e;
+  }
 }
 function fmtD(iso){
   if(!iso) return '';
@@ -350,33 +360,52 @@ function go(name){
 
 // ══ HEALTH ══
 async function checkHealth(){
+  $('cdot').className='cdot sp';
+  $('ctitle').textContent='Connecting…';
+  $('csub').textContent='';
   try{
-    const d=await api('/api/health');
+    const d=await api('/api/health',undefined,undefined,25000);
     $('cdot').className='cdot ok';
     $('ctitle').textContent=d.sheet_name||'Connected';
-    $('csub').textContent=(d.tabs||[]).length+' tabs';
+    $('csub').textContent=(d.tabs||[]).length+' tab(s)';
+    return true;
   }catch(e){
     $('cdot').className='cdot err';
-    $('ctitle').textContent='Not connected';
-    $('csub').textContent=e.message.slice(0,32);
+    $('ctitle').textContent='Connection failed';
+    $('csub').textContent=e.message.slice(0,45);
+    return false;
   }
 }
 
 // ══ INIT DATA ══
 async function loadInitData(){
+  $('order-content').innerHTML='<div class="ld"><div class="spn" style="color:var(--green)"></div> Connecting to Google Sheets…</div>';
   try{
-    appData=await api('/api/init-data');
+    appData=await api('/api/init-data',undefined,undefined,25000);
     rvDate=appData.today;
     renderOrderForm();
     $('tbdate').textContent=fmtD(appData.today);
   }catch(e){
-    $('order-content').innerHTML=`<div class="empty"><div class="ei">⚠️</div><h3>Not set up</h3><p>Open DB Setup → ⚡ Run Setup</p></div>`;
+    const isTimeout=e.message.includes('timed out');
+    $('order-content').innerHTML=`
+      <div class="empty">
+        <div class="ei">${isTimeout?'⏱️':'⚠️'}</div>
+        <h3>${isTimeout?'Server is waking up…':'Connection Error'}</h3>
+        <p style="max-width:380px;margin:0 auto">${e.message}</p>
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn bp" onclick="loadInitData()">↺ Retry</button>
+          <button class="btn by" onclick="toggleSetup();document.getElementById('sdr').classList.add('open');document.getElementById('sarrow').textContent='▼'">
+            🗄️ Open DB Setup
+          </button>
+        </div>
+        ${isTimeout?'<div style="margin-top:14px;font-size:12px;color:var(--mut)">Render free tier sleeps after inactivity.<br>First request takes ~30s. Click Retry in a moment.</div>':''}
+      </div>`;
   }
 }
 
 async function loadMonths(){
   try{
-    const d=await api('/api/months');
+    const d=await api('/api/months',undefined,undefined,25000);
     allMonths=d.months||[];
   }catch(e){allMonths=[];}
 }
@@ -993,7 +1022,10 @@ async function runSetup(){
 async function boot(){
   rvDate=todayISO();
   $('tbdate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  await Promise.all([checkHealth(),loadInitData(),loadMonths()]);
+  // Run health first — it's fast and tells us connection status
+  // Then run init-data + months in parallel
+  checkHealth();
+  await Promise.all([loadInitData(), loadMonths()]);
 }
 boot();
 </script>
