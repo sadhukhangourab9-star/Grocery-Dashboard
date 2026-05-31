@@ -247,11 +247,104 @@ def receiver():
 @app.route("/api/mark-delivered", methods=["POST"])
 def mark_delivered():
     try:
-        row_index = request.json.get("row_index")
+        body      = request.json or {}
+        row_index = body.get("row_index")
+        month_key = body.get("month_key", None)
         sh  = get_sheet()
-        ws  = get_inv_ws(sh)
+        ws  = sh.worksheet(f"Inventory_{month_key}") if month_key else get_inv_ws(sh)
         ws.update_cell(row_index, STATUS_COL, "Delivered")
         return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ── /api/months ───────────────────────────────────────────────────────────────
+@app.route("/api/months")
+def list_months():
+    try:
+        sh     = get_sheet()
+        months = [ws.title[len("Inventory_"):] for ws in sh.worksheets()
+                  if ws.title.startswith("Inventory_")]
+        return jsonify({"months": months})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ── /api/month-dashboard/<month_key> ─────────────────────────────────────────
+@app.route("/api/month-dashboard/<month_key>")
+def month_dashboard(month_key):
+    try:
+        sh   = get_sheet()
+        ws   = sh.worksheet(f"Inventory_{month_key}")
+        data = ws.get_all_values()
+        if not data:
+            return jsonify({"error": "Sheet is empty"}), 404
+
+        headers  = data[0]
+        products = headers[len(FIXED_COLS):]
+
+        total_orders = delivered = pending = 0
+        prod_totals  = {p: 0 for p in products}
+        date_counts  = {}
+        slot_counts  = {}
+        orders       = []
+
+        for i, row in enumerate(data[1:], start=2):
+            if not any(c.strip() for c in row):
+                continue
+            padded = row + [""] * max(0, len(headers) - len(row))
+            acct   = padded[2].strip()
+            status = padded[4].strip()
+            if acct.lower() in ("old stock", "current stock", ""):
+                continue
+
+            date  = padded[0].strip()
+            slot  = padded[1].strip()
+            oname = padded[3].strip()
+
+            total_orders += 1
+            if status.lower() == "delivered":
+                delivered += 1
+            else:
+                pending += 1
+
+            date_counts[date] = date_counts.get(date, 0) + 1
+            if slot:
+                slot_counts[slot] = slot_counts.get(slot, 0) + 1
+
+            qtys = {}
+            for j, p in enumerate(products):
+                col = len(FIXED_COLS) + j
+                val = padded[col] if col < len(padded) else ""
+                try:
+                    n = int(float(val)) if val else 0
+                except:
+                    n = 0
+                qtys[p] = n
+                if status.lower() == "delivered":
+                    prod_totals[p] += n
+
+            orders.append({
+                "row_index":  i,
+                "date":       date,
+                "slot":       slot,
+                "account":    acct,
+                "order_name": oname,
+                "status":     status,
+                "quantities": qtys
+            })
+
+        return jsonify({
+            "month_key":    month_key,
+            "products":     products,
+            "total_orders": total_orders,
+            "delivered":    delivered,
+            "pending":      pending,
+            "prod_totals":  prod_totals,
+            "date_counts":  dict(sorted(date_counts.items())),
+            "slot_counts":  slot_counts,
+            "orders":       orders
+        })
+    except gspread.WorksheetNotFound:
+        return jsonify({"error": f"Inventory_{month_key} not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
