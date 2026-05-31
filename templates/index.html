@@ -167,6 +167,13 @@
     .dcell .dcd{font-size:10px}
     .dcell .dcc{font-size:15px;font-weight:700;color:var(--green)}
 
+    /* Remove number input spinners */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    input[type=number]{-moz-appearance:textfield}
+    .cell-inp{background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--blue);font-family:var(--mono);font-size:12.5px;width:70px;text-align:center;outline:none;padding:4px 6px;transition:border .12s}
+    .cell-inp:focus{border-color:var(--blue);background:var(--bbg)}
+
     /* Badge */
     .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;font-family:var(--mono)}
     .bg{background:rgba(63,185,80,.12);color:var(--green)}
@@ -687,22 +694,30 @@ function renderMonthly(d){
 }
 
 // ══ SALES MANAGER ══
+// Holds unsaved edits per product per salesman: { "Gourab|Fortune Mustard pouch": 4 }
+let salesEdits = {};
+
 async function loadSalesPage(){
   await loadMonths();
   if(!activeSalesKey) activeSalesKey=currentMonthKey();
   await fetchAndRenderSales(activeSalesKey);
 }
+
 async function fetchAndRenderSales(key){
   activeSalesKey=key;
+  salesEdits={};
   $('sales-content').innerHTML=`
     <div id="sales-picker-wrap" class="card" style="padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <div style="font-size:13px;font-weight:600">💰 Select Month</div>
-      <select class="month-sel" onchange="fetchAndRenderSales(this.value)">
+      <select class="month-sel" id="sales-month-sel">
         ${allMonths.map(m=>`<option value="${m}" ${m===key?'selected':''}>${fmtMK(m)}</option>`).join('')}
       </select>
-      <button class="btn bo bsm" onclick="fetchAndRenderSales('${currentMonthKey()}')">Current Month</button>
+      <button class="btn bo bsm" onclick="fetchAndRenderSales(currentMonthKey())">Current Month</button>
     </div>
     <div class="ld"><div class="spn" style="color:var(--green)"></div> Loading sales data…</div>`;
+
+  document.getElementById('sales-month-sel').onchange=function(){fetchAndRenderSales(this.value);};
+
   try{
     salesData=await api('/api/sales-manager/'+encodeURIComponent(key));
     renderSales(salesData);
@@ -710,40 +725,56 @@ async function fetchAndRenderSales(key){
     $('sales-content').innerHTML+=`<div class="empty"><div class="ei">⚠️</div><h3>Error</h3><p>${e.message}</p></div>`;
   }
 }
+
 function renderSales(d){
   const {month_key,products,salesmen,delivered,sales,remaining}=d;
-  const pickerHTML=$('sales-picker-wrap')?.outerHTML||'';
+  // initialise edits from current saved values
+  salesEdits={};
+  salesmen.forEach(sm=>products.forEach(p=>{ salesEdits[sm+'|'+p]=sales[sm]?.[p]||0; }));
+
   const totalSold={};
   products.forEach(p=>{totalSold[p]=salesmen.reduce((s,sm)=>s+(sales[sm]?.[p]||0),0);});
+  const totalDel=Object.values(delivered).reduce((a,b)=>a+b,0);
+  const totalSoldAll=Object.values(totalSold).reduce((a,b)=>a+b,0);
+  const totalRem=Object.values(remaining).reduce((a,b)=>a+b,0);
 
+  const pickerHTML=$('sales-picker-wrap')?.outerHTML||'';
   $('sales-content').innerHTML=`
   ${pickerHTML}
-  <div style="max-width:1100px">
-    <!-- Summary stats -->
+  <div style="max-width:1140px">
+
+    <!-- Stats -->
     <div class="sg3" style="margin-bottom:20px">
-      <div class="sbox"><div class="slbl">Products Tracked</div><div class="sval" style="color:var(--blue)">${products.length}</div></div>
-      <div class="sbox"><div class="slbl">Total Delivered</div><div class="sval" style="color:var(--green)">${Object.values(delivered).reduce((a,b)=>a+b,0)}</div></div>
-      <div class="sbox"><div class="slbl">Total Sold</div><div class="sval" style="color:var(--yellow)">${Object.values(totalSold).reduce((a,b)=>a+b,0)}</div></div>
+      <div class="sbox"><div class="slbl">Total Delivered</div><div class="sval" style="color:var(--green)">${totalDel}</div><div class="ssub">From inventory sheet</div></div>
+      <div class="sbox"><div class="slbl">Total Sold</div><div class="sval" style="color:var(--yellow)">${totalSoldAll}</div><div class="ssub">Sum of all salesmen</div></div>
+      <div class="sbox"><div class="slbl">Remaining Stock</div><div class="sval" style="color:var(--purple)">${totalRem}</div><div class="ssub">Delivered − Sold</div></div>
     </div>
 
-    <!-- Main sales table -->
-    <div class="card">
+    <!-- Entry table -->
+    <div class="card" id="sales-entry-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-        <div style="font-size:14px;font-weight:700">📊 Sales Breakdown — ${fmtMK(month_key)}</div>
-        <div style="display:flex;gap:8px">
+        <div>
+          <div style="font-size:14px;font-weight:700">✏️ Enter Sales — ${fmtMK(month_key)}</div>
+          <div style="font-size:12px;color:var(--mut);margin-top:3px">Fill in quantities sold per salesman, then click Save All</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn bo bsm" onclick="fetchAndRenderSales('${month_key}')">↺ Refresh</button>
+          <button class="btn bp bsm" id="save-sales-btn" onclick="saveAllSales('${month_key}')">
+            💾 Save All Sales
+          </button>
           <button class="btn bpurp bsm" onclick="transferStock('${month_key}')">
             📦 Transfer Remaining → Next Month
           </button>
         </div>
       </div>
+
       <div class="twrap">
-        <table class="smtbl">
+        <table class="smtbl" id="sales-entry-tbl">
           <thead>
             <tr>
               <th>Product</th>
               <th class="r">Total Delivered</th>
-              ${salesmen.map(s=>`<th class="r salesman">${s}</th>`).join('')}
+              ${salesmen.map(sm=>`<th class="r salesman">${sm}</th>`).join('')}
               <th class="r">Total Sold</th>
               <th class="r remain">Remaining</th>
             </tr>
@@ -753,66 +784,175 @@ function renderSales(d){
               const del=delivered[p]||0;
               const sold=totalSold[p]||0;
               const rem=remaining[p]||0;
-              return `<tr>
-                <td>${p}</td>
+              return `<tr id="srow-${p.replace(/[^a-z0-9]/gi,'_')}">
+                <td style="font-size:12.5px">${p}</td>
                 <td class="r total-del">${del}</td>
                 ${salesmen.map(sm=>`<td class="r salesman">
-                  <input class="cell-inp" type="number" min="0" value="${sales[sm]?.[p]||0}"
-                    onchange="updateSale('${month_key}','${sm}','${p}',this.value)"
-                    title="Edit ${sm}'s sale for ${p}">
+                  <input class="cell-inp" type="number" min="0" placeholder="0"
+                    value="${sales[sm]?.[p]||''}"
+                    id="sinp-${sm}-${p.replace(/[^a-z0-9]/gi,'_')}"
+                    oninput="onSaleInput('${sm}','${p}',this.value)">
                 </td>`).join('')}
-                <td class="r" style="color:var(--yellow)">${sold}</td>
-                <td class="r remain">${rem}</td>
+                <td class="r" id="stotal-${p.replace(/[^a-z0-9]/gi,'_')}" style="color:var(--yellow)">${sold||'—'}</td>
+                <td class="r remain" id="srem-${p.replace(/[^a-z0-9]/gi,'_')}">${rem}</td>
               </tr>`;
             }).join('')}
             <!-- Totals row -->
             <tr style="background:rgba(255,255,255,.03);font-weight:700;border-top:2px solid var(--bd)">
-              <td style="font-weight:700;color:var(--text)">TOTAL</td>
-              <td class="r total-del">${Object.values(delivered).reduce((a,b)=>a+b,0)}</td>
-              ${salesmen.map(sm=>`<td class="r salesman">${products.reduce((s,p)=>s+(sales[sm]?.[p]||0),0)}</td>`).join('')}
-              <td class="r" style="color:var(--yellow)">${Object.values(totalSold).reduce((a,b)=>a+b,0)}</td>
-              <td class="r remain">${Object.values(remaining).reduce((a,b)=>a+b,0)}</td>
+              <td>TOTAL</td>
+              <td class="r total-del">${totalDel}</td>
+              ${salesmen.map(sm=>`<td class="r salesman" id="scoltotal-${sm}">${products.reduce((s,p)=>s+(sales[sm]?.[p]||0),0)||0}</td>`).join('')}
+              <td class="r" style="color:var(--yellow)" id="sgrandtotal">${totalSoldAll||0}</td>
+              <td class="r remain" id="sremtotal">${totalRem}</td>
             </tr>
           </tbody>
         </table>
       </div>
       <div style="margin-top:10px;font-size:11.5px;color:var(--mut)">
-        💡 Click any number in the salesman columns to edit. Changes are saved to Sales_Log immediately.
+        💡 Enter quantities for each salesman then click <b>Save All Sales</b>. Spinner inputs are removed — just type the number.
       </div>
     </div>
+
+    <!-- Sales log breakdown table -->
+    <div class="card" id="sales-log-card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px">📋 Sales Log — Who Sold What</div>
+      <div class="twrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Salesman</th>
+              <th>Product</th>
+              <th class="r">Qty Sold</th>
+              <th class="r">% of Total Delivered</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${salesmen.flatMap(sm=>
+              products
+                .filter(p=>(sales[sm]?.[p]||0)>0)
+                .map(p=>{
+                  const qty=sales[sm][p];
+                  const del=delivered[p]||0;
+                  const pct=del>0?Math.round(qty/del*100):0;
+                  return `<tr>
+                    <td><span style="font-family:var(--mono);font-size:11px;background:var(--bbg);color:var(--blue);padding:2px 8px;border-radius:10px">${sm}</span></td>
+                    <td style="font-size:12.5px">${p}</td>
+                    <td class="r" style="color:var(--blue);font-family:var(--mono);font-weight:700">${qty}</td>
+                    <td class="r">
+                      <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end">
+                        <div style="width:60px;height:5px;background:var(--bd);border-radius:3px;overflow:hidden">
+                          <div style="width:${pct}%;height:100%;background:var(--blue);border-radius:3px"></div>
+                        </div>
+                        <span style="font-family:var(--mono);font-size:11.5px;color:var(--mut)">${pct}%</span>
+                      </div>
+                    </td>
+                  </tr>`;
+                })
+            ).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--mut);padding:18px">No sales recorded yet. Enter quantities above and save.</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>`;
-  // Re-attach picker event
+
+  // Re-attach picker
   const sel=$('sales-content').querySelector('.month-sel');
-  if(sel) sel.onchange=function(){fetchAndRenderSales(this.value)};
+  if(sel) sel.onchange=function(){fetchAndRenderSales(this.value);};
 }
 
-async function updateSale(month_key, buyer, product, newVal){
-  const qty=parseInt(newVal)||0;
-  // Determine date range for this month to log properly
-  const parts=month_key.split('_');
-  const date=new Date().toISOString().split('T')[0]; // use today as log date
-  try{
-    await api('/api/log-sale','POST',{date,buyer,product,qty,month_key});
-    // Refresh sales data silently
-    salesData=null;
-    toast(`${buyer}: ${product} updated ✓`);
-    setTimeout(()=>fetchAndRenderSales(month_key),800);
-  }catch(e){toast('Error: '+e.message,'err');}
+// Called on every keystroke — updates running totals live without saving
+function onSaleInput(sm, product, val){
+  const pk = sm+'|'+product;
+  salesEdits[pk] = parseInt(val)||0;
+
+  const pid = product.replace(/[^a-z0-9]/gi,'_');
+  const {salesmen, products, delivered} = salesData||{salesmen:[],products:[],delivered:{}};
+
+  // Update row total sold + remaining
+  const rowTotal = salesmen.reduce((s,s2)=>{
+    const v=document.getElementById('sinp-'+s2+'-'+pid);
+    return s+(parseInt(v?.value||'0')||0);
+  },0);
+  const remEl=$('srem-'+pid), totEl=$('stotal-'+pid);
+  if(totEl) totEl.textContent=rowTotal||'—';
+  if(remEl) remEl.textContent=Math.max(0,(delivered[product]||0)-rowTotal);
+
+  // Update column total for this salesman
+  const smPid = sm;
+  const colTotal = products.reduce((s,p)=>{
+    const v=document.getElementById('sinp-'+sm+'-'+p.replace(/[^a-z0-9]/gi,'_'));
+    return s+(parseInt(v?.value||'0')||0);
+  },0);
+  const colEl=$('scoltotal-'+sm); if(colEl) colEl.textContent=colTotal;
+
+  // Grand total
+  const grand=salesmen.reduce((s,s2)=>{
+    const cel=$('scoltotal-'+s2); return s+(parseInt(cel?.textContent||'0')||0);
+  },0);
+  const grandEl=$('sgrandtotal'); if(grandEl) grandEl.textContent=grand;
+
+  // Remaining total
+  const remTotal=products.reduce((s,p)=>{
+    const el=$('srem-'+p.replace(/[^a-z0-9]/gi,'_')); return s+(parseInt(el?.textContent||'0')||0);
+  },0);
+  const remTotEl=$('sremtotal'); if(remTotEl) remTotEl.textContent=remTotal;
+}
+
+async function saveAllSales(month_key){
+  if(!salesData){toast('No data loaded','err');return;}
+  const {salesmen, products} = salesData;
+  const date=new Date().toISOString().split('T')[0];
+  const btn=$('save-sales-btn');
+  btn.disabled=true; btn.innerHTML='<div class="spn" style="color:#0d1117"></div> Saving…';
+
+  let saved=0, errors=0;
+  for(const sm of salesmen){
+    for(const p of products){
+      const pid=p.replace(/[^a-z0-9]/gi,'_');
+      const inp=document.getElementById('sinp-'+sm+'-'+pid);
+      const qty=parseInt(inp?.value||'0')||0;
+      if(qty>0){
+        try{
+          await api('/api/log-sale','POST',{date,buyer:sm,product:p,qty,month_key});
+          saved++;
+        }catch(e){ errors++; }
+      }
+    }
+  }
+
+  btn.disabled=false; btn.innerHTML='💾 Save All Sales';
+  if(errors) toast(`Saved ${saved}, ${errors} errors`,'err');
+  else toast(`✓ ${saved} entries saved to Sales_Log`);
+
+  // Reload to show fresh data + updated log table
+  salesData=null;
+  await fetchAndRenderSales(month_key);
 }
 
 async function transferStock(month_key){
   if(!salesData){toast('Load sales data first','err');return;}
-  const remaining=salesData.remaining;
+  // Read current remaining from live cells
+  const {products}=salesData;
+  const remaining={};
+  products.forEach(p=>{
+    const pid=p.replace(/[^a-z0-9]/gi,'_');
+    const el=$('srem-'+pid);
+    remaining[p]=parseInt(el?.textContent||'0')||0;
+  });
   const nzProds=Object.entries(remaining).filter(([,v])=>v>0);
-  if(!nzProds.length){
-    if(!confirm('All remaining stock is 0. Still create next month sheet?')) return;
-  } else {
-    const summary=nzProds.map(([p,v])=>`${p}: ${v}`).join('\n');
-    if(!confirm(`Transfer remaining stock to next month's Old Stock?\n\n${summary}\n\nThis will create the next month's inventory sheet.`)) return;
-  }
+  const msg = nzProds.length
+    ? `Transfer remaining stock to next month Old Stock?
+
+${nzProds.map(([p,v])=>p+': '+v).join('
+')}
+
+This creates next month's Inventory sheet.`
+    : 'All remaining is 0. Still create next month sheet?';
+  if(!confirm(msg)) return;
   try{
-    const d=await api('/api/transfer-stock','POST',{from_month:month_key, remaining});
-    toast(`✓ Transferred to ${d.next_month} as Old Stock`);
+    const d=await api('/api/transfer-stock','POST',{from_month:month_key,remaining});
+    toast('✓ Transferred to '+d.next_month+' as Old Stock');
     await loadMonths();
   }catch(e){toast('Transfer failed: '+e.message,'err');}
 }
