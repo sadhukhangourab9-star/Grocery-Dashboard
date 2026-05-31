@@ -168,78 +168,201 @@ def add_order():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ── /api/receiver  (today's pending orders) ───────────────────────────────────
+# ── /api/receiver  (pending orders for a given date) ─────────────────────────
 @app.route("/api/receiver")
 def receiver():
-    """
-    Returns today's pending orders, grouped by slot.
-    Also returns per-slot product totals for the summary table.
-    """
     try:
+        date_filter = request.args.get("date", datetime.now().strftime("%Y-%m-%d"))
         sh      = get_sheet()
         ws      = get_inv_ws(sh)
         data    = ws.get_all_values()
         if not data:
-            return jsonify({"slots": [], "summary": {}, "orders": []})
+            return jsonify({"slots": [], "summary": {}, "orders": [], "date": date_filter})
 
         headers  = data[0]
         products = headers[len(FIXED_COLS):]
-        today    = datetime.now().strftime("%Y-%m-%d")
-
         orders       = []
-        slot_summary = {}   # { slot: { product: total } }
+        slot_summary = {}
 
         for i, row in enumerate(data[1:], start=2):
             if not any(c.strip() for c in row):
                 continue
-            padded = row + [""] * max(0, len(headers) - len(row))
-
+            padded     = row + [""] * max(0, len(headers) - len(row))
             row_date   = padded[0].strip()
             row_slot   = padded[1].strip()
             row_acct   = padded[2].strip()
             row_oname  = padded[3].strip()
             row_status = padded[4].strip().lower()
 
-            # Skip structural rows
             if row_acct.lower() in ("old stock", "current stock", ""):
                 continue
-            # Only today's pending
-            if row_date != today or row_status != "pending":
+            if row_date != date_filter or row_status != "pending":
                 continue
 
             qtys = {}
             for j, p in enumerate(products):
                 col = len(FIXED_COLS) + j
                 val = padded[col] if col < len(padded) else ""
-                try:
-                    qtys[p] = int(float(val)) if val else 0
-                except:
-                    qtys[p] = 0
+                try:    qtys[p] = int(float(val)) if val else 0
+                except: qtys[p] = 0
 
-            orders.append({
-                "row_index":  i,
-                "date":       row_date,
-                "slot":       row_slot,
-                "account":    row_acct,
-                "order_name": row_oname,
-                "quantities": qtys
-            })
-
+            orders.append({"row_index": i, "date": row_date, "slot": row_slot,
+                           "account": row_acct, "order_name": row_oname, "quantities": qtys})
             if row_slot not in slot_summary:
                 slot_summary[row_slot] = {p: 0 for p in products}
             for p, q in qtys.items():
                 slot_summary[row_slot][p] = slot_summary[row_slot].get(p, 0) + q
 
-        # Sort slots naturally
-        all_slots = list(slot_summary.keys())
+        return jsonify({
+            "products": products, "slots": list(slot_summary.keys()),
+            "summary": slot_summary, "orders": orders, "date": date_filter
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ── /api/sales-manager/<month_key> ───────────────────────────────────────────
+@app.route("/api/sales-manager/<month_key>")
+def sales_manager(month_key):
+    """
+    Returns per-product totals per salesman from Sales_Log for that month,
+    plus total delivered qty from Inventory sheet.
+    Remaining = total delivered - sum(all salesmen sold).
+    """
+    try:
+        sh       = get_sheet()
+        products = get_products_from_sheet(sh)
+        SALESMEN = ["Gourab", "Souvik", "Rajkumar"]
+
+        # Get delivered totals from inventory sheet
+        try:
+            ws_inv   = sh.worksheet(f"Inventory_{month_key}")
+            inv_data = ws_inv.get_all_values()
+            headers  = inv_data[0] if inv_data else []
+            prod_cols = {p: headers.index(p) for p in products if p in headers}
+            delivered_totals = {p: 0 for p in products}
+            for row in inv_data[1:]:
+                if not row or len(row) < 5: continue
+                acct   = row[2].strip()
+                status = row[4].strip().lower()
+                if acct.lower() in ("old stock","current stock","") or status != "delivered":
+                    continue
+                for p, ci in prod_cols.items():
+                    try: delivered_totals[p] += int(float(row[ci])) if ci < len(row) and row[ci] else 0
+                    except: pass
+        except:
+            delivered_totals = {p: 0 for p in products}
+
+        # Get sales from Sales_Log filtered by month
+        sales = {s: {p: 0 for p in products} for s in SALESMEN}
+        try:
+            ws_sales   = sh.worksheet("Sales_Log")
+            sales_data = ws_sales.get_all_values()
+            # month_key like "May_2026" → filter rows where date starts with "2026-05"
+            import calendar
+            parts    = month_key.split("_")
+            mon_abbr = parts[0]   # "May"
+            year     = parts[1]   # "2026"
+            mon_num  = list(calendar.month_abbr).index(mon_abbr)
+            prefix   = f"{year}-{mon_num:02d}"
+
+            for row in sales_data[1:]:
+                if len(row) < 4: continue
+                date, buyer, product, qty = row[0].strip(), row[1].strip(), row[2].strip(), row[3].strip()
+                if not date.startswith(prefix): continue
+                # Match buyer to salesman (case-insensitive prefix)
+                matched = next((s for s in SALESMEN if s.lower() in buyer.lower()), None)
+                if matched and product in sales[matched]:
+                    try: sales[matched][product] += int(float(qty)) if qty else 0
+                    except: pass
+        except: pass
+
+        # Build remaining
+        remaining = {}
+        for p in products:
+            sold = sum(sales[s][p] for s in SALESMEN)
+            remaining[p] = max(0, delivered_totals[p] - sold)
 
         return jsonify({
-            "products":    products,
-            "slots":       all_slots,
-            "summary":     slot_summary,
-            "orders":      orders,
-            "today":       today
+            "month_key":       month_key,
+            "products":        products,
+            "salesmen":        SALESMEN,
+            "delivered":       delivered_totals,
+            "sales":           sales,
+            "remaining":       remaining
         })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ── /api/log-sale  (add single sale entry) ───────────────────────────────────
+@app.route("/api/log-sale", methods=["POST"])
+def log_sale():
+    try:
+        body    = request.json or {}
+        date    = body.get("date",    datetime.now().strftime("%Y-%m-%d"))
+        buyer   = body.get("buyer",   "")
+        product = body.get("product", "")
+        qty     = int(body.get("qty", 0))
+        if not buyer or not product or qty <= 0:
+            return jsonify({"error": "buyer, product and qty required"}), 400
+        sh = get_sheet()
+        ws = sh.worksheet("Sales_Log")
+        ws.append_row([date, buyer, product, qty], value_input_option="USER_ENTERED")
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ── /api/transfer-stock  (carry remaining → next month Old Stock) ─────────────
+@app.route("/api/transfer-stock", methods=["POST"])
+def transfer_stock():
+    """
+    Reads remaining stock from current month's sales manager calculation,
+    creates next month's Inventory sheet (if not exists), and sets its Old Stock row.
+    """
+    try:
+        body      = request.json or {}
+        from_key  = body.get("from_month")   # e.g. "May_2026"
+        remaining = body.get("remaining", {}) # { product: qty }
+
+        if not from_key:
+            return jsonify({"error": "from_month required"}), 400
+
+        sh       = get_sheet()
+        products = get_products_from_sheet(sh)
+
+        # Determine next month key
+        import calendar
+        parts    = from_key.split("_")
+        mon_abbr = parts[0]; year = int(parts[1])
+        mon_num  = list(calendar.month_abbr).index(mon_abbr)
+        if mon_num == 12:
+            next_mon_num = 1; next_year = year + 1
+        else:
+            next_mon_num = mon_num + 1; next_year = year
+        next_key   = f"{calendar.month_abbr[next_mon_num]}_{next_year}"
+        next_title = f"Inventory_{next_key}"
+
+        existing = {ws.title for ws in sh.worksheets()}
+        headers  = FIXED_COLS + products
+        cols     = len(headers) + 5
+
+        # Create next month sheet if needed
+        if next_title not in existing:
+            ws_next = sh.add_worksheet(title=next_title, rows=500, cols=cols)
+        else:
+            ws_next = sh.worksheet(next_title)
+
+        ws_next.update("A1", [headers])
+        old_row = ["-", "-", "Old Stock", "-", "Delivered"] +                   [str(remaining.get(p, 0)) for p in products]
+        ws_next.update("A2", [old_row])
+
+        try:
+            ws_next.format("A1:ZZ1", {
+                "textFormat":      {"bold": True},
+                "backgroundColor": {"red": 0.13, "green": 0.37, "blue": 0.18}
+            })
+        except: pass
+
+        return jsonify({"success": True, "next_month": next_key, "sheet": next_title})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
