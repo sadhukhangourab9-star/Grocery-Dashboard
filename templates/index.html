@@ -932,7 +932,6 @@ async function saveAllSales(month_key){
 
 async function transferStock(month_key){
   if(!salesData){toast('Load sales data first','err');return;}
-  // Read current remaining from live cells
   const {products}=salesData;
   const remaining={};
   products.forEach(p=>{
@@ -941,18 +940,14 @@ async function transferStock(month_key){
     remaining[p]=parseInt(el?.textContent||'0')||0;
   });
   const nzProds=Object.entries(remaining).filter(([,v])=>v>0);
-  const msg = nzProds.length
-    ? `Transfer remaining stock to next month Old Stock?
-
-${nzProds.map(([p,v])=>p+': '+v).join('
-')}
-
-This creates next month's Inventory sheet.`
-    : 'All remaining is 0. Still create next month sheet?';
+  const summary=nzProds.map(([p,v])=>p+': '+v).join('\n');
+  const msg=nzProds.length
+    ?'Transfer remaining stock to next month Old Stock?\n\n'+summary+'\n\nThis will create the next month inventory sheet.'
+    :'All remaining is 0. Still create next month sheet?';
   if(!confirm(msg)) return;
   try{
     const d=await api('/api/transfer-stock','POST',{from_month:month_key,remaining});
-    toast('✓ Transferred to '+d.next_month+' as Old Stock');
+    toast('Transferred to '+d.next_month+' as Old Stock ✓');
     await loadMonths();
   }catch(e){toast('Transfer failed: '+e.message,'err');}
 }
