@@ -902,32 +902,31 @@ function onSaleInput(sm, product, val){
 async function saveAllSales(month_key){
   if(!salesData){toast('No data loaded','err');return;}
   const {salesmen, products} = salesData;
-  const date=new Date().toISOString().split('T')[0];
   const btn=$('save-sales-btn');
   btn.disabled=true; btn.innerHTML='<div class="spn" style="color:#0d1117"></div> Saving…';
 
-  let saved=0, errors=0;
-  for(const sm of salesmen){
-    for(const p of products){
+  // Build full sales object from current input values
+  const salesPayload={};
+  salesmen.forEach(sm=>{
+    salesPayload[sm]={};
+    products.forEach(p=>{
       const pid=p.replace(/[^a-z0-9]/gi,'_');
       const inp=document.getElementById('sinp-'+sm+'-'+pid);
       const qty=parseInt(inp?.value||'0')||0;
-      if(qty>0){
-        try{
-          await api('/api/log-sale','POST',{date,buyer:sm,product:p,qty,month_key});
-          saved++;
-        }catch(e){ errors++; }
-      }
-    }
+      salesPayload[sm][p]=qty;
+    });
+  });
+
+  try{
+    // Single batch call — clears old month entries then saves fresh
+    const d=await api('/api/save-sales','POST',{month_key, sales:salesPayload});
+    toast(`✓ ${d.saved} entries saved (replaced ${d.deleted} old entries)`);
+    salesData=null;
+    await fetchAndRenderSales(month_key);
+  }catch(e){
+    toast('Save failed: '+e.message,'err');
   }
-
   btn.disabled=false; btn.innerHTML='💾 Save All Sales';
-  if(errors) toast(`Saved ${saved}, ${errors} errors`,'err');
-  else toast(`✓ ${saved} entries saved to Sales_Log`);
-
-  // Reload to show fresh data + updated log table
-  salesData=null;
-  await fetchAndRenderSales(month_key);
 }
 
 async function transferStock(month_key){
