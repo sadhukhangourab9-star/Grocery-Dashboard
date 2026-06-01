@@ -332,11 +332,19 @@ def sales_manager(month_key):
                 if not row or len(row) < 5: continue
                 acct   = row[2].strip()
                 status = row[4].strip().lower()
-                if acct.lower() in ("old stock","current stock","") or status != "delivered":
+                is_old_stock = acct.lower() == "old stock"
+                # Include Old Stock row (transferred from previous month)
+                # AND all rows with status = delivered
+                if is_old_stock:
+                    for p, ci in prod_cols.items():
+                        try: delivered_totals[p] += int(float(row[ci])) if ci < len(row) and row[ci] else 0
+                        except: pass
+                elif acct.lower() in ("current stock", "") or status != "delivered":
                     continue
-                for p, ci in prod_cols.items():
-                    try: delivered_totals[p] += int(float(row[ci])) if ci < len(row) and row[ci] else 0
-                    except: pass
+                else:
+                    for p, ci in prod_cols.items():
+                        try: delivered_totals[p] += int(float(row[ci])) if ci < len(row) and row[ci] else 0
+                        except: pass
         except:
             delivered_totals = {p: 0 for p in products}
 
