@@ -374,6 +374,7 @@ def sales_manager(month_key):
 # ── /api/log-sale ─────────────────────────────────────────────────────────────
 @app.route("/api/log-sale", methods=["POST"])
 def log_sale():
+    """Single sale entry — append only (used for quick logging)."""
     try:
         body    = request.json or {}
         date    = body.get("date",    datetime.now().strftime("%Y-%m-%d"))
@@ -386,6 +387,61 @@ def log_sale():
         ws = sh.worksheet("Sales_Log")
         ws.append_row([date, buyer, product, qty], value_input_option="USER_ENTERED")
         return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ── /api/save-sales  (batch save — clears old entries for month+buyer first) ──
+@app.route("/api/save-sales", methods=["POST"])
+def save_sales():
+    """
+    Receives full sales data for a month and replaces all existing Sales_Log
+    entries for that month+salesman combination with fresh data.
+    Body: { month_key: "May_2026", sales: { "Gourab": { "Product": qty, ... }, ... } }
+    """
+    try:
+        import calendar
+        body      = request.json or {}
+        month_key = body.get("month_key", "")
+        sales_in  = body.get("sales", {})   # { salesman: { product: qty } }
+
+        if not month_key:
+            return jsonify({"error": "month_key required"}), 400
+
+        # Build month date prefix e.g. "2026-05"
+        parts    = month_key.split("_")
+        mon_abbr = parts[0]; year = parts[1]
+        mon_num  = list(calendar.month_abbr).index(mon_abbr)
+        prefix   = f"{year}-{mon_num:02d}"
+        save_date = f"{prefix}-01"   # use 1st of month as canonical date
+
+        sh = get_sheet()
+        ws = sh.worksheet("Sales_Log")
+        all_rows = ws.get_all_values()
+
+        # Find row indices to DELETE (existing entries for this month)
+        rows_to_delete = []
+        for i, row in enumerate(all_rows[1:], start=2):
+            if not row: continue
+            row_date  = row[0].strip() if len(row) > 0 else ""
+            row_buyer = row[1].strip() if len(row) > 1 else ""
+            if row_date.startswith(prefix) and row_buyer in sales_in:
+                rows_to_delete.append(i)
+
+        # Delete from bottom up to preserve row indices
+        for idx in reversed(rows_to_delete):
+            ws.delete_rows(idx)
+
+        # Append fresh rows for every salesman + product with qty > 0
+        new_rows = []
+        for salesman, products in sales_in.items():
+            for product, qty in products.items():
+                if qty and int(qty) > 0:
+                    new_rows.append([save_date, salesman, product, int(qty)])
+
+        if new_rows:
+            ws.append_rows(new_rows, value_input_option="USER_ENTERED")
+
+        return jsonify({"success": True, "saved": len(new_rows), "deleted": len(rows_to_delete)})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
